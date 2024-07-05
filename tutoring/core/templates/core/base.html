@@ -1,0 +1,29 @@
+<!-- core/templates/core/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tutoring Services{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_head %}
+    {% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <nav>
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'course_list' %}">Courses</a></li>
+            <li><a href="{% url 'book_session' %}">Book a Session</a></li>
+            <li><a href="{% url 'reviews' %}">Reviews</a></li>
+        </ul>
+    </nav>
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>
