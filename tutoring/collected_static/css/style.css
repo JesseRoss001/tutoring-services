@@ -1,0 +1,140 @@
+/* core/static/css/style.css */
+
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    
+    color: #0f0f10;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.navbar {
+
+    border-bottom: 2px solid #c2a9a9; /* Red bottom border */
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: #0a0202 !important; /* Red text */
+}
+.background-color-navbar {color:gray;} 
+
+.navbar-nav .nav-link {
+    color: #090909 !important;
+    margin-right: 1rem;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #ff0000 !important; /* Red text on hover */
+    background-color: rgba(255, 0, 0, 0.1); /* Light red background on hover */
+    border-radius: 5px;
+}
+
+/* Content Styles */
+.container {
+    flex: 1;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: #212529;
+    margin-bottom: 20px;
+}
+
+/* Footer Styles */
+.footer {
+    background-color: #000000;
+    color: #f8f9fa;
+    padding: 40px 0;
+}
+
+.footer h5 {
+    margin-bottom: 15px;
+    color: #f8f9fa;
+}
+
+.footer ul {
+    padding: 0;
+    list-style: none;
+}
+
+.footer ul li {
+    margin-bottom: 10px;
+}
+
+.footer .text-center {
+    margin-top: 20px;
+    border-top: 1px solid #f8f9fa;
+    padding-top: 20px;
+}
+
+.footer .text-center p {
+    margin: 0;
+    color: #f8f9fa;
+}
+
+/* Custom Classes */
+.bg-primary {
+    background-color: #854b00 !important;
+}
+
+.text-primary {
+    color: #040404 !important;
+}
+
+.bg-dark {
+    background-color: #d5cdc9 !important;
+}
+
+.text-white {
+    color: #131314 !important;
+}
+
+/* Buttons */
+.btn-custom {
+    background-color: #004085;
+    color: #f8f9fa;
+    border-radius: 5px;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
+}
+
+.btn-custom:hover {
+    background-color: #2a5298;
+    color: #f8f9fa;
+}
+
+.btn-secondary {
+    background-color: #95164b;
+    color: #f8f9fa;
+    border-radius: 5px;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+    background-color: #850018;
+    color: #f8f9fa;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .navbar-nav {
+        text-align: center;
+    }
+
+    .navbar-nav .nav-link {
+        padding: 10px 15px;
+    }
+
+    .content {
+        padding: 15px;
+    }
+
+    .footer {
+        padding: 20px 0;
+    }
+}

@@ -1,5 +1,7 @@
 from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
 from .models import Course, Session, Review
+import json
 
 def home(request):
     return render(request, 'core/home.html')
@@ -17,5 +19,14 @@ def book_session(request):
     pass
 
 def reviews(request):
-    reviews = Review.objects.all()
-    return render(request, 'core/reviews.html', {'reviews': reviews})
+    reviews = Review.objects.all().values('id', 'course__title', 'review_text', 'rating', 'created_at')
+    reviews_json = json.dumps(list(reviews), default=str)
+    return render(request, 'core/reviews.html', {'reviews_json': reviews_json})
+
+def reviews_api(request):
+    try:
+        reviews = Review.objects.all().values('id', 'course__title', 'review_text', 'rating', 'created_at')
+        return JsonResponse(list(reviews), safe=False)
+    except Exception as e:
+        logger.error(f"Failed to fetch reviews: {str(e)}")  # Ensure you have logging configured
+        return JsonResponse({'error': str(e)}, status=500)

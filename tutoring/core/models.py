@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils import timezone
 class Course(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
@@ -30,6 +30,7 @@ class Review(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     review_text = models.TextField()
     rating = models.PositiveSmallIntegerField()
+    created_at = models.DateTimeField(default=timezone.now)  # Added field
 
     def __str__(self):
         return f"{self.course.title} - {self.rating}"

@@ -1,0 +1,107 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Reviews{% endblock %}
+
+{% block extra_head %}
+    <!-- Ensure Vue.js is in production mode by using the minified version -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <style>
+        .review {
+            color: black;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .review h3 {
+            margin-top: 0;
+        }
+    </style>
+    <script type="application/json" id="reviews-data">
+        {{ reviews_json|safe }}
+    </script>
+{% endblock %}
+
+{% block content %}
+    <!-- Plain Django Template Rendering -->
+    <h1>Plain Django Template Rendering</h1>
+    {% for review in reviews %}
+    <div class="review">
+        <h3>{{ review.course__title }}</h3>
+        <p>{{ review.review_text }}</p>
+        <p>Rating: {{ review.rating }}</p>
+    </div>
+    {% endfor %}
+
+    <!-- Vue.js App -->
+    <div id="app">
+        <h1>Vue.js Rendering</h1>
+        <div v-if="loading">Loading...</div>
+        <div v-if="error">{{ error }}</div>
+
+        <!-- Basic v-for Loop -->
+        <div v-for="review in reviews" :key="review.id" class="review">
+            <h3>[[ review.course__title ]]</h3>
+            <p>[[ review.review_text ]]</p>
+            <p>Rating: [[ review.rating ]]</p>
+        </div>
+
+        <!-- Rendering with Method Call -->
+        <div v-for="review in getReviews()" :key="review.id" class="review">
+            <h3>[[ review.course__title ]]</h3>
+            <p>[[ review.review_text ]]</p>
+            <p>Rating: [[ review.rating ]]</p>
+        </div>
+
+        <!-- Rendering with Computed Property -->
+        <div v-for="review in computedReviews" :key="review.id" class="review">
+            <h3>[[ review.course__title ]]</h3>
+            <p>[[ review.review_text ]]</p>
+            <p>Rating: [[ review.rating ]]</p>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    new Vue({
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        data: {
+            reviews: JSON.parse(document.getElementById('reviews-data').textContent),
+            loading: false,
+            error: ''
+        },
+        methods: {
+            async fetchReviews() {
+                this.loading = true;
+                try {
+                    const response = await fetch('{% url "reviews_api" %}');
+                    if (!response.ok) throw new Error('Failed to fetch: ' + response.statusText);
+                    const data = await response.json();
+                    console.log('Data received:', data);
+                    this.reviews = data;
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    this.error = 'Failed to load reviews: ' + error.message;
+                } finally {
+                    this.loading = false;
+                }
+            },
+            getReviews() {
+                return this.reviews;
+            }
+        },
+        computed: {
+            computedReviews() {
+                return this.reviews.map(review => {
+                    return { ...review, rating: `Rating: ${review.rating}` };
+                });
+            }
+        },
+        mounted() {
+            this.fetchReviews();
+        }
+    });
+</script>
+{% endblock %}
