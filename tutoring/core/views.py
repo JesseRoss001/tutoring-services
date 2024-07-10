@@ -21,7 +21,7 @@ def book_session(request):
 def reviews(request):
     reviews = Review.objects.all().values('id', 'course__title', 'review_text', 'rating', 'created_at')
     reviews_json = json.dumps(list(reviews), default=str)
-    return render(request, 'core/reviews.html', {'reviews_json': reviews_json})
+    return render(request, 'core/reviews.html', {'reviews_json': reviews_json, 'reviews': reviews})
 
 def reviews_api(request):
     try:

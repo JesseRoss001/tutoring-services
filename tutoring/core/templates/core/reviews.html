@@ -73,7 +73,7 @@
         </div>
 
         <div class="row">
-            <div v-for="review in filteredReviews" :key="review.id" class="col-md-6">
+            <div v-for="review in paginatedReviews" :key="review.id" class="col-md-6">
                 <div class="card review-card">
                     <div class="card-body">
                         <h3 class="card-title">[[ review.course__title ]]</h3>
@@ -90,7 +90,7 @@
                 <li class="page-item" :class="{ disabled: pagination.currentPage === 1 }">
                     <a class="page-link" href="#" @click.prevent="changePage(pagination.currentPage - 1)">Previous</a>
                 </li>
-                <li class="page-item" v-for="page in pagination.totalPages" :class="{ active: pagination.currentPage === page }">
+                <li class="page-item" v-for="page in pages" :class="{ active: pagination.currentPage === page }">
                     <a class="page-link" href="#" @click.prevent="changePage(page)">[[ page ]]</a>
                 </li>
                 <li class="page-item" :class="{ disabled: pagination.currentPage === pagination.totalPages }">
@@ -131,7 +131,15 @@
                     filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                 }
                 this.pagination.totalPages = Math.ceil(filtered.length / this.pagination.perPage);
-                return filtered.slice((this.pagination.currentPage - 1) * this.pagination.perPage, this.pagination.currentPage * this.pagination.perPage);
+                return filtered;
+            },
+            paginatedReviews() {
+                const start = (this.pagination.currentPage - 1) * this.pagination.perPage;
+                const end = start + this.pagination.perPage;
+                return this.filteredReviews.slice(start, end);
+            },
+            pages() {
+                return Array.from({ length: this.pagination.totalPages }, (_, i) => i + 1);
             }
         },
         methods: {
