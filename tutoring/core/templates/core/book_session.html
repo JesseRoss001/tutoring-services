@@ -1,0 +1,60 @@
+<!-- book_session.html -->
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Book a Session</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="course_id">Course:</label>
+            <select id="course_id" name="course_id" class="form-control">
+                {% for course in courses %}
+                    <option value="{{ course.id }}">{{ course.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="student_id">Student (if applicable):</label>
+            <select id="student_id" name="student_id" class="form-control">
+                <option value="">-- Select a Student --</option>
+                {% for student in students %}
+                    <option value="{{ student.id }}">{{ student.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="available_hour_id">Available Hour:</label>
+            <select id="available_hour_id" name="available_hour_id" class="form-control">
+                <option value="">-- Select an Available Hour --</option>
+                {% for hour in available_hours %}
+                    {% if hour.specific_date %}
+                        <option value="{{ hour.id }}">{{ hour.specific_date }}: {{ hour.start_time }} - {{ hour.end_time }}</option>
+                    {% else %}
+                        <option value="{{ hour.id }}">{{ hour.day_of_week }}: {{ hour.start_time }} - {{ hour.end_time }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Book</button>
+    </form>
+
+    <h2 class="mt-5">Upcoming Events (Next 30 Days)</h2>
+    <div class="calendar">
+        {% for day in next_30_days %}
+            <div class="day">
+                <h5>{{ day|date:"D, M d" }}</h5>
+                {% for event_data in events_data %}
+                    {% if event_data.event.start|date:"Y-m-d" == day|date:"Y-m-d" %}
+                        <div class="event">
+                            <a href="{% url 'event_detail' event_data.event.id %}">{{ event_data.event.title }} ({{ event_data.event.start|date:"H:i" }} - {{ event_data.event.end|date:"H:i" }})</a>
+                            <p>{{ event_data.filled_slots }} out of {{ event_data.total_slots }} slots filled</p>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -17,4 +17,11 @@ urlpatterns = [
     path('api/reviews/', views.reviews_api, name='reviews_api'),
     path('store/', views.store, name='store'),
     path('api/store-items/', views.store_items_api, name='store_items_api'),
-]
+    path('schedule/', include('schedule.urls')),  # Include the schedule URLs
+    path('payments/', include('payments.urls')),  # Include the payment URLs
+    path('event/<int:event_id>/', views.event_detail, name='event_detail'),
+
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Include the router URLs
+urlpatterns += router.urls

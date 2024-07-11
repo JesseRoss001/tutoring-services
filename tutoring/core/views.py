@@ -1,11 +1,18 @@
-from django.shortcuts import render, get_object_or_404
+# views.py
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from rest_framework import viewsets
-from .models import Product
+from .models import Product, Course, Session, Review, LiveStream, RecordedCourse, Student, AvailableHour
 from .serializers import ProductSerializer
-from .models import Course, Session, Review, Product
 from django.core.paginator import Paginator  # Correct import
 import json
+from django.utils import timezone
+from datetime import datetime, timedelta
+from schedule.models import Calendar, Event, Occurrence  # Import from Django-Scheduler
+from payments import get_payment_model, RedirectNeeded
+from django.db import models  # Add this import
+
+Payment = get_payment_model()
 
 def home(request):
     return render(request, 'core/home.html')
@@ -17,10 +24,74 @@ def course_list(request):
 def course_detail(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     return render(request, 'core/course_detail.html', {'course': course})
-
 def book_session(request):
-    # Implementation of booking form and logic goes here
-    pass
+    if request.method == 'POST':
+        course_id = request.POST.get('course_id')
+        student_id = request.POST.get('student_id')
+        available_hour_id = request.POST.get('available_hour_id')
+        
+        course = get_object_or_404(Course, id=course_id)
+        student = get_object_or_404(Student, id=student_id) if student_id else None
+        available_hour = get_object_or_404(AvailableHour, id=available_hour_id)
+
+        calendar, _ = Calendar.objects.get_or_create(name='Sessions')
+
+        start_datetime = datetime.combine(
+            available_hour.specific_date or datetime.today(), available_hour.start_time)
+        end_datetime = datetime.combine(
+            available_hour.specific_date or datetime.today(), available_hour.end_time)
+
+        event = Event.objects.create(
+            title=f"Session for {course.title}",
+            start=start_datetime,
+            end=end_datetime,
+            calendar=calendar
+        )
+
+        Occurrence.objects.create(
+            event=event,
+            start=start_datetime,
+            end=end_datetime
+        )
+
+        session = Session.objects.create(
+            course=course,
+            student=student,
+            date=start_datetime,
+            duration=end_datetime - start_datetime,
+            event_type='1-to-1' if student else 'group'
+        )
+
+        if course.price > 0:
+            payment = Payment.objects.create(
+                variant='default',
+                description=f"Payment for {session.course.title}",
+                total=course.price,
+                session=session,
+                user=request.user
+            )
+            try:
+                payment.save()
+                return redirect(payment.get_process_url())
+            except RedirectNeeded as redirect_to:
+                return redirect(str(redirect_to))
+        else:
+            return redirect('course_detail', course_id=course_id)
+
+    courses = Course.objects.all()
+    students = Student.objects.all()
+    available_hours = AvailableHour.objects.all()
+
+    return render(request, 'core/book_session.html', {
+        'courses': courses,
+        'students': students,
+        'available_hours': available_hours,
+    })
+# views.py
+def event_detail(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    occurrences = event.occurrence_set.all()
+    return render(request, 'core/event_detail.html', {'event': event, 'occurrences': occurrences})
 
 def reviews(request):
     reviews = Review.objects.all().values('id', 'course__title', 'review_text', 'rating', 'created_at')

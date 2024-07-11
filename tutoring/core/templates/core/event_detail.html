@@ -1,0 +1,18 @@
+<!-- event_detail.html -->
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Event Details</h1>
+    <h2>{{ event.title }}</h2>
+    <p>Start: {{ event.start }}</p>
+    <p>End: {{ event.end }}</p>
+    <h3>Occurrences</h3>
+    <ul>
+        {% for occurrence in occurrences %}
+            <li>{{ occurrence.start }} - {{ occurrence.end }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'book_session' %}" class="btn btn-primary">Back to Booking</a>
+</div>
+{% endblock %}

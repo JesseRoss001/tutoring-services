@@ -25,7 +25,8 @@ INSTALLED_APPS = [
     'core',  # Your custom app
     'rest_framework',  # Django REST Framework
     'django.contrib.humanize',
-
+    'schedule',  # Add this line to include the schedule app
+    'payments',  # Add this line to include the payments app
 ]
 
 
@@ -110,3 +111,12 @@ REST_FRAMEWORK = {
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Payment settings
+PAYMENT_HOST = 'localhost'
+PAYMENT_USES_SSL = False
+PAYMENT_MODEL = 'core.Payment'
+PAYMENT_VARIANTS = {
+    'default': ('payments.dummy.DummyProvider', {})
+}
