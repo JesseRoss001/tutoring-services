@@ -40,21 +40,26 @@
         <button type="submit" class="btn btn-primary">Book</button>
     </form>
 
-    <h2 class="mt-5">Upcoming Events (Next 30 Days)</h2>
-    <div class="calendar">
-        {% for day in next_30_days %}
-            <div class="day">
-                <h5>{{ day|date:"D, M d" }}</h5>
-                {% for event_data in events_data %}
-                    {% if event_data.event.start|date:"Y-m-d" == day|date:"Y-m-d" %}
-                        <div class="event">
-                            <a href="{% url 'event_detail' event_data.event.id %}">{{ event_data.event.title }} ({{ event_data.event.start|date:"H:i" }} - {{ event_data.event.end|date:"H:i" }})</a>
+   <h2 class="mt-5">Upcoming Events (Next 30 Days)</h2>
+<div class="calendar">
+    {% for day in next_30_days %}
+        <div class="day">
+            <h5>{{ day|date:"D, M d" }}</h5>
+            {% for event_data in events_data %}
+                {% if event_data.event.start|date:"Y-m-d" == day|date:"Y-m-d" %}
+                    <div class="event">
+                        <a href="{% url 'event_detail' event_data.event.id %}">{{ event_data.event.title }} ({{ event_data.event.start|date:"H:i" }} - {{ event_data.event.end|date:"H:i" }})</a>
+                        {% if event_data.session.event_type == 'group' or event_data.session.event_type == 'live_stream' %}
                             <p>{{ event_data.filled_slots }} out of {{ event_data.total_slots }} slots filled</p>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        {% endfor %}
-    </div>
+                        {% else %}
+                            <p>One-to-one session</p>
+                        {% endif %}
+                        <p>Price: ${{ event_data.session.course.price }}</p>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
 </div>
 {% endblock %}
