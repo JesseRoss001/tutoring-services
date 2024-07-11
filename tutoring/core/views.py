@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
-from .models import Course, Session, Review
+from .models import Course, Session, Review, StoreItem
 import json
 
 def home(request):
@@ -29,4 +29,15 @@ def reviews_api(request):
         return JsonResponse(list(reviews), safe=False)
     except Exception as e:
         logger.error(f"Failed to fetch reviews: {str(e)}")  # Ensure you have logging configured
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def store(request):
+    return render(request, 'core/store.html')
+
+def store_items_api(request):
+    try:
+        items = StoreItem.objects.all().values('id', 'name', 'description', 'price', 'image', 'subject', 'exam_board', 'age_range', 'created_at')
+        return JsonResponse(list(items), safe=False)
+    except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
