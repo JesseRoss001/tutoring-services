@@ -24,7 +24,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',  # Your custom app
     'rest_framework',  # Django REST Framework
+    'django.contrib.humanize',
+
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

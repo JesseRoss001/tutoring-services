@@ -4,6 +4,7 @@ from rest_framework import viewsets
 from .models import Product
 from .serializers import ProductSerializer
 from .models import Course, Session, Review, Product
+from django.core.paginator import Paginator  # Correct import
 import json
 
 def home(request):
@@ -39,12 +40,21 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
 
 def store(request):
-    products = Product.objects.all()
-    return render(request, 'core/store.html', {'products': products})
+    query = request.GET.get('q')
+    if query:
+        products = Product.objects.filter(name__icontains=query)
+    else:
+        products = Product.objects.all()
+
+    paginator = Paginator(products, 10)  # Show 10 products per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'core/store.html', {'page_obj': page_obj, 'query': query})
 
 def store_items_api(request):
     try:
-        items = Product.objects.all().values('id', 'name', 'description', 'price', 'image', 'subject', 'exam_board', 'age_range', 'created_at')
+        items = Product.objects.all().values('id', 'name', 'description', 'price', 'image')
         return JsonResponse(list(items), safe=False)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

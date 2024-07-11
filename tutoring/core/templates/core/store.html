@@ -1,53 +1,142 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-<div id="app">
-  <!-- Django Loop -->
-  <div>
-    <h1>Django Rendered Products</h1>
-    {% for product in products %}
-      <div>
-        <h3>{{ product.name }}</h3>
-        <p>{{ product.description }}</p>
-        <p>Price: £{{ product.price }}</p>
-        <img src="{{ product.image.url }}" alt="{{ product.name }} Image">
-      </div>
-    {% endfor %}
-  </div>
+<div class="container mt-5">
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-8">
+            <h1 class="text-primary">Our Exclusive Products</h1>
+        </div>
+        <div class="col-md-4">
+            <form method="get" action="{% url 'store' %}">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Search for products..." value="{{ query }}">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
-  <h1>Vue Rendered Products</h1>
-  
-  <!-- Vue with Django Context -->
-  <div v-for="product in djangoProducts" :key="product.id">
-    <h3>{{ product.name }}</h3>
-    <p>{{ product.description }}</p>
-    <p>Price: £{{ product.price }}</p>
-    <img :src="product.image" alt="Vue Image">
-  </div>
+    <div class="row">
+        {% for product in page_obj %}
+            <div class="col-md-4 mb-4">
+                <div class="card product-card border-0 shadow-sm">
+                    <img src="{{ product.image.url }}" class="card-img-top product-image" alt="{{ product.name }} Image">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">{{ product.name }}</h5>
+                        <p class="card-text">{{ product.description|truncatechars:100 }}</p>
+                        <p class="card-text price-text">Price: £{{ product.price }}</p>
+                        <a href="#" class="btn btn-primary btn-block buy-now-button">Buy Now</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if query %}&q={{ query }}{% endif %}" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-5' and num < page_obj.number|add:'5' %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script>
-  new Vue({
-    el: '#app',
-    data: {
-      djangoProducts: []
-    },
-    methods: {
-      fetchProducts() {
-        axios.get('/api/products/')
-          .then(response => {
-            this.djangoProducts = response.data;
-          })
-          .catch(error => {
-            console.error('Error fetching products:', error);
-          });
-      }
-    },
-    mounted() {
-      this.fetchProducts();
+<style>
+    body {
+        background-color: #f8f9fa;
     }
-  });
-</script>
+    .product-card {
+        border-radius: 15px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    .product-image {
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    }
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    .card-text {
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+    .price-text {
+        font-size: 1.25rem;
+        color: #dc3545;
+        font-weight: 700;
+    }
+    .buy-now-button {
+        background-color: #007bff;
+        border: none;
+        font-size: 1.1rem;
+        padding: 0.75rem;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .buy-now-button:hover {
+        background-color: #0056b3;
+    }
+    .pagination .page-link {
+        color: #007bff;
+    }
+    .pagination .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    .pagination .page-item .page-link:hover {
+        background-color: #0056b3;
+        color: white;
+    }
+    .input-group {
+        margin-bottom: 1.5rem;
+    }
+    .input-group .form-control {
+        border-radius: 5px 0 0 5px;
+        border: 1px solid #ced4da;
+    }
+    .input-group .btn {
+        border-radius: 0 5px 5px 0;
+    }
+</style>
 {% endblock %}
