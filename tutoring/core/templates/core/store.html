@@ -1,180 +1,53 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Store{% endblock %}
-
-{% block extra_head %}
-    <!-- Ensure Vue.js is in production mode by using the minified version -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Open Sans', sans-serif;
-        }
-        .header h1 {
-            font-family: 'Montserrat', sans-serif;
-            color: #2C2E83;
-        }
-        .store-item-card {
-            margin-bottom: 20px;
-            transition: transform 0.3s;
-            border: 1px solid #ddd;
-        }
-        .store-item-card:hover {
-            transform: scale(1.05);
-        }
-        .store-item-card h5 {
-            font-family: 'Poppins', sans-serif;
-            color: #2C2E83;
-        }
-        .store-item-card p {
-            color: #5A5A5A;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .filter-section {
-            margin-bottom: 30px;
-        }
-    </style>
-{% endblock %}
-
 {% block content %}
-<div class="container mt-5" id="store-app">
-    <div class="header">
-        <h1>Our Store</h1>
-        <p class="lead">Explore our collection of past paper questions, textbooks, merchandise, and more!</p>
-    </div>
-    <div v-if="loading" class="alert alert-info text-center">Loading...</div>
-    <div v-if="error" class="alert alert-danger text-center">{{ error }}</div>
-    <div class="filter-section row justify-content-center">
-        <div class="col-md-6">
-            <input v-model="search" class="form-control mb-3" placeholder="Search items...">
-        </div>
-        <div class="col-md-3">
-            <select v-model="sortOrder" class="form-select mb-3">
-                <option value="newest">Newest First</option>
-                <option value="lowest">Lowest Price</option>
-                <option value="highest">Highest Price</option>
-            </select>
-        </div>
-    </div>
-    <div class="row">
-        <div v-for="item in paginatedItems" :key="item.id" class="col-md-4">
-            <div class="card store-item-card">
-                <img :src="'/static/' + item.image" class="card-img-top" :alt="item.name">
-                <div class="card-body">
-                    <h5 class="card-title">{{ item.name }}</h5>
-                    <p class="card-text"><strong>Price:</strong> £{{ item.price }}</p>
-                   <p class="card-text"><strong>Subject:</strong> {{ item.subject|default:"Not Specified" }}</p>
-<p class="card-text"><strong>Exam Board:</strong> {{ item.exam_board|default:"Not Specified" }}</p>
-<p class="card-text"><strong>Age Range:</strong> {{ item.age_range|default:"Not Specified" }}</p>
+<div id="app">
+  <!-- Django Loop -->
+  <div>
+    <h1>Django Rendered Products</h1>
+    {% for product in products %}
+      <div>
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description }}</p>
+        <p>Price: £{{ product.price }}</p>
+        <img src="{{ product.image.url }}" alt="{{ product.name }} Image">
+      </div>
+    {% endfor %}
+  </div>
 
-                    <a :href="'/store/' + item.id + '/'" class="btn btn-primary">View Details</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <nav aria-label="Page navigation example" v-if="pagination.totalPages > 1">
-        <ul class="pagination justify-content-center mt-4">
-            <li class="page-item" :class="{ disabled: pagination.currentPage === 1 }">
-                <a class="page-link" href="#" @click.prevent="changePage(pagination.currentPage - 1)">Previous</a>
-            </li>
-            <li class="page-item" v-for="page in pages" :class="{ active: pagination.currentPage === page }">
-                <a class="page-link" href="#" @click.prevent="changePage(page)">{{ page }}</a>
-            </li>
-            <li class="page-item" :class="{ disabled: pagination.currentPage === pagination.totalPages }">
-                <a class="page-link" href="#" @click.prevent="changePage(pagination.currentPage + 1)">Next</a>
-            </li>
-        </ul>
-    </nav>
+  <h1>Vue Rendered Products</h1>
+  
+  <!-- Vue with Django Context -->
+  <div v-for="product in djangoProducts" :key="product.id">
+    <h3>{{ product.name }}</h3>
+    <p>{{ product.description }}</p>
+    <p>Price: £{{ product.price }}</p>
+    <img :src="'/media/' + product.image" alt="Vue Image">
+  </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
-    const storeItemsApiUrl = '{% url "store_items_api" %}';
-</script>
-<script>
-    {% verbatim %}
-    new Vue({
-        delimiters: ['[[', ']]'],
-        el: '#store-app',
-        data: {
-            items: [],
-            loading: false,
-            error: '',
-            search: '',
-            sortOrder: 'newest',
-            pagination: {
-                currentPage: 1,
-                perPage: 4,
-                totalPages: 0
-            }
-        },
-        computed: {
-            filteredItems() {
-                console.log('Filtering items with search term:', this.search);
-                let filtered = this.items.filter(item => item.name.toLowerCase().includes(this.search.toLowerCase()) ||
-                    item.subject?.toLowerCase().includes(this.search.toLowerCase()) ||
-                    item.exam_board?.toLowerCase().includes(this.search.toLowerCase()) ||
-                    item.age_range?.toLowerCase().includes(this.search.toLowerCase()));
-                
-                if (this.sortOrder === 'highest') {
-                    filtered.sort((a, b) => b.price - a.price);
-                } else if (this.sortOrder === 'lowest') {
-                    filtered.sort((a, b) => a.price - b.price);
-                } else {
-                    filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                }
-                
-                console.log('Filtered items:', filtered);
-                return filtered;
-            },
-            paginatedItems() {
-                console.log('Paginated items for current page:', this.pagination.currentPage);
-                return this.filteredItems.slice((this.pagination.currentPage - 1) * this.pagination.perPage, this.pagination.currentPage * this.pagination.perPage);
-            },
-            pages() {
-                return Array.from({ length: this.pagination.totalPages }, (v, k) => k + 1);
-            }
-        },
-        methods: {
-            async fetchItems() {
-                this.loading = true;
-                console.log('Fetching items from API...');
-                try {
-                    const response = await fetch(storeItemsApiUrl);
-                    console.log('API response status:', response.status);
-                    if (!response.ok) throw new Error('Failed to fetch: ' + response.statusText);
-                    const data = await response.json();
-                    console.log('Data received:', data);
-                    this.items = data;
-                    this.pagination.totalPages = Math.ceil(this.items.length / this.pagination.perPage);
-                } catch (error) {
-                    console.error('Error loading data:', error);
-                    this.error = 'Failed to load items: ' + error.message;
-                } finally {
-                    this.loading = false;
-                }
-            },
-            changePage(page) {
-                if (page > 0 && page <= this.pagination.totalPages) {
-                    console.log('Changing to page:', page);
-                    this.pagination.currentPage = page;
-                } else {
-                    console.warn('Invalid page number:', page);
-                }
-            }
-        },
-        mounted() {
-            console.log('Vue app mounted. Fetching items...');
-            this.fetchItems();
-        }
-    });
-    {% endverbatim %}
+  new Vue({
+    el: '#app',
+    data: {
+      djangoProducts: []
+    },
+    methods: {
+      fetchProducts() {
+        axios.get('/api/products/')
+          .then(response => {
+            this.djangoProducts = response.data;
+          })
+          .catch(error => {
+            console.error('Error fetching products:', error);
+          });
+      }
+    },
+    mounted() {
+      this.fetchProducts();
+    }
+  });
 </script>
 {% endblock %}

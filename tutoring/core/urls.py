@@ -1,5 +1,12 @@
-from django.urls import path
+from django.conf import settings
+from django.urls import path, include
 from . import views
+from rest_framework.routers import DefaultRouter
+from .views import ProductViewSet
+from django.conf.urls.static import static
+
+router = DefaultRouter()
+router.register(r'products', ProductViewSet)
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -10,4 +17,5 @@ urlpatterns = [
     path('api/reviews/', views.reviews_api, name='reviews_api'),
     path('store/', views.store, name='store'),
     path('api/store-items/', views.store_items_api, name='store_items_api'),
+    path('api/', include(router.urls)),
 ]

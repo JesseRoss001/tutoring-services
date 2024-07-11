@@ -1,6 +1,9 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
-from .models import Course, Session, Review, StoreItem
+from rest_framework import viewsets
+from .models import Product
+from .serializers import ProductSerializer
+from .models import Course, Session, Review, Product
 import json
 
 def home(request):
@@ -30,14 +33,18 @@ def reviews_api(request):
     except Exception as e:
         logger.error(f"Failed to fetch reviews: {str(e)}")  # Ensure you have logging configured
         return JsonResponse({'error': str(e)}, status=500)
-
+    
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
 def store(request):
-    return render(request, 'core/store.html')
+    products = Product.objects.all()
+    return render(request, 'core/store.html', {'products': products})
 
 def store_items_api(request):
     try:
-        items = StoreItem.objects.all().values('id', 'name', 'description', 'price', 'image', 'subject', 'exam_board', 'age_range', 'created_at')
+        items = Product.objects.all().values('id', 'name', 'description', 'price', 'image', 'subject', 'exam_board', 'age_range', 'created_at')
         return JsonResponse(list(items), safe=False)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
