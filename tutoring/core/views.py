@@ -81,11 +81,26 @@ def book_session(request):
     courses = Course.objects.all()
     students = Student.objects.all()
     available_hours = AvailableHour.objects.all()
+    today = timezone.now()
+    next_30_days = [today + timedelta(days=i) for i in range(30)]
+    events = Event.objects.filter(start__range=(today, today + timedelta(days=30)))
+
+    events_data = []
+    for event in events:
+        total_slots = event.calendar.event_set.aggregate(total=models.Count('occurrence'))['total']
+        filled_slots = event.occurrence_set.count()
+        events_data.append({
+            'event': event,
+            'total_slots': total_slots,
+            'filled_slots': filled_slots
+        })
 
     return render(request, 'core/book_session.html', {
         'courses': courses,
         'students': students,
         'available_hours': available_hours,
+        'next_30_days': next_30_days,
+        'events_data': events_data
     })
 # views.py
 def event_detail(request, event_id):
