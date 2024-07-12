@@ -1,0 +1,17 @@
+{% extends "core/base.html" %}
+
+{% block title %}Live Stream Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">{{ live_stream.title }}</h1>
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Start Time:</strong> {{ live_stream.start_time }}</p>
+            <p><strong>End Time:</strong> {{ live_stream.end_time }}</p>
+            <p><strong>Description:</strong> {{ live_stream.description }}</p>
+            <p><strong>Link:</strong> <a href="{{ live_stream.link }}" target="_blank">{{ live_stream.link }}</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
