@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+
+{% block title %}Available Hours on {{ date }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Available Hours on {{ date }}</h1>
+    <div class="list-group">
+        {% for hour in available_hours %}
+            <div class="list-group-item">
+                <p><strong>Time:</strong> {{ hour.start_time }} - {{ hour.end_time }}</p>
+                {% if hour.is_available %}
+                    <a href="{% url 'book_available_hour' hour.id %}" class="btn btn-success">Book Now</a>
+                {% else %}
+                    <p class="text-danger"><strong>Already Booked</strong></p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

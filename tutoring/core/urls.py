@@ -21,6 +21,7 @@ urlpatterns = [
     path('live-streams/', views.live_stream_list, name='live_stream_list'),
     path('live-streams/<int:live_stream_id>/', views.live_stream_detail, name='live_stream_detail'),
     path('available-hours/', views.available_hours_list, name='available_hours_list'),
+    path('available-hours/<str:date>/', views.available_hour_detail, name='available_hour_detail'),
     path('available-hours/book/<int:available_hour_id>/', views.book_available_hour, name='book_available_hour'),
     path('reviews/', views.reviews, name='reviews'),
     path('api/reviews/', views.reviews_api, name='reviews_api'),

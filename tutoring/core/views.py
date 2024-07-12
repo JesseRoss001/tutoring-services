@@ -103,7 +103,18 @@ def available_hours_list(request):
         today = timezone.now()
         next_30_days = [today + timezone.timedelta(days=i) for i in range(30)]
         available_hours = AvailableHour.get_available_hours(today)
-        return render(request, 'core/available_hours_list.html', {'available_hours': available_hours, 'next_30_days': next_30_days})
+        days_status = {}
+        for day in next_30_days:
+            hours = AvailableHour.get_available_hours(day)
+            days_status[day] = hours.exists()
+        return render(request, 'core/available_hours_list.html', {'days_status': days_status})
+    except Exception as e:
+        return render(request, 'core/error.html', {'error': str(e)})
+
+def available_hour_detail(request, date):
+    try:
+        available_hours = AvailableHour.get_available_hours(date)
+        return render(request, 'core/available_hour_detail.html', {'available_hours': available_hours, 'date': date})
     except Exception as e:
         return render(request, 'core/error.html', {'error': str(e)})
 
