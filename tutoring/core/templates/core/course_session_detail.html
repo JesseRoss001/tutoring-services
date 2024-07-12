@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">{{ course_session.course.title }}</h1>
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Start Time:</strong> {{ course_session.start_time }}</p>
+            <p><strong>End Time:</strong> {{ course_session.end_time }}</p>
+            <p><strong>Cost:</strong> ${{ course_session.cost }}</p>
+            <p><strong>Max Participants:</strong> {{ course_session.max_participants }}</p>
+            <form method="post" action="{% url 'join_course_session' course_session.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Join Session</button>
+            </form>
+            {% if error %}
+                <p class="text-danger mt-3">{{ error }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

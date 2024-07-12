@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Group Sessions</h1>
+    <div class="row">
+        {% for session in group_sessions %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ session.title }}</h5>
+                        <p class="card-text"><strong>Start Time:</strong> {{ session.start_time }}</p>
+                        <p class="card-text"><strong>End Time:</strong> {{ session.end_time }}</p>
+                        <p class="card-text"><strong>Cost:</strong> ${{ session.cost }}</p>
+                        <a href="{% url 'group_session_detail' session.id %}" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

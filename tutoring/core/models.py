@@ -1,4 +1,3 @@
-# models.py
 from django.db import models
 from django.utils import timezone
 from schedule.models import Calendar, Event, Occurrence  # Import from Django-Scheduler
@@ -113,7 +112,6 @@ class AvailableHour(models.Model):
         recurring_hours = AvailableHour.objects.filter(day_of_week=day_of_week, is_available=True)
         return specific_hours | recurring_hours
 
-
 class Review(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
@@ -135,6 +133,3 @@ class Product(models.Model):
 
 class Payment(BasePayment):
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
-
-
-
