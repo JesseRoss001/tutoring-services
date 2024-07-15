@@ -1,9 +1,184 @@
-<!-- core/templates/core/home.html -->
 {% extends 'core/base.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}North Wales Tutoring - Premier Education Services{% endblock %}
 
 {% block content %}
-<h1>Welcome to North Wales Tutoring</h1>
-<p>We offer remote tutoring in Mathematics and Science.</p>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <section id="hero" class="text-center">
+        <h1 class="">Empowering Students Across North Wales</h1>
+        <p class="lead">Achieve academic excellence with personalised tutoring in Maths, Science, and more. Serving Gwynedd, Conwy, Denbighshire, and beyond.</p>
+        <a href="#contact" class="btn btn-primary mt-3">Get In Touch</a>
+    </section>
+
+    <section id="about" class="my-5">
+        <h2>About North Wales Tutoring</h2>
+        <p>With a decade of experience, North Wales Tutoring offers specialized educational services designed to elevate student performance in key academic areas. From Wrexham to Bangor, we cover all major locales, ensuring your educational needs are met with expertise and care.</p>
+    </section>
+
+    <section id="services" class="my-5">
+        <h2>Our Services</h2>
+        <div class="row">
+            <div class="col-md-6 col-lg-4">
+                <h3>Mathematics</h3>
+                <p>Master mathematical concepts with courses tailored from basic arithmetic to advanced calculus.</p>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <h3>Science</h3>
+                <p>Dive into the world of biology, chemistry, and physics with our expert tutors and state-of-the-art teaching methods.</p>
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <h3>Exam Preparation</h3>
+                <p>Excel in your GCSEs and A-Levels with strategic preparation courses and practice exams.</p>
+            </div>
+        </div>
+    </section>
+
+<section id="locations" class="my-5">
+    <h2> Remote Tutoring </h2>
+    <p>With over 10 years of experience in teaching Mathematics, I offer personalised tutoring across North Wales.</p>
+    <select class="form-select" aria-label="Select your location">
+        <option selected> Areas served </option>
+        <option value="Bangor">Bangor</option>
+        <option value="Conwy">Conwy</option>
+        <option value="Llandudno">Llandudno</option>
+        <option value="Wrexham">Wrexham</option>
+        <option value="Rhyl">Rhyl</option>
+        <option value="Flint">Flint</option>
+        <option value="Denbigh">Denbigh</option>
+        <option value="Caernarfon">Caernarfon</option>
+        <option value="Abergele">Abergele</option>
+        <option value="Hawarden">Hawarden</option>
+        <option value="Colwyn Bay">Colwyn Bay</option>
+        <option value="Ruthin">Ruthin</option>
+        <option value="Prestatyn">Prestatyn</option>
+        <option value="Holywell">Holywell</option>
+        <option value="Llangollen">Llangollen</option>
+<option value="Across Wales and England">Other locations in Wales and England </option>
+    </select>
+</section>
+
+    <section id="contact" class="my-5">
+    <h2>Contact Us</h2>
+    <p>Connect with us today to start your journey towards academic success.</p>
+    <ul class="list-unstyled mx-auto text-center">
+        <li><a href="https://www.facebook.com/northwalestutoring" target="_blank" class="py-2"><i class="fab fa-facebook-f"></i> Facebook</a></li>
+        <li><a href="https://www.instagram.com/northwalestutoring" target="_blank" class="py-2"><i class="fab fa-instagram"></i> Instagram</a></li>
+    </ul>
+        <form>
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="message" class="form-label">Message</label>
+                <textarea class="form-control" id="message" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </section>
+
+<style>
+/* General Body Styles */
+
+
+/* Navbar Customization */
+
+
+/* Section General Styling */
+section {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(1px);
+    margin-bottom: 2rem;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 5px solid var(--primary-color);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Titles and Headings */
+/* Titles and Headings */
+h1, h2, h3 {
+    color: #333;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dde0e3; /* Primary color for underline */
+    margin-bottom: 20px;
+}
+
+/* Social Media Icons Styling */
+ul.list-unstyled a {
+    color: #333; /* Matching text color */
+    text-decoration: none; /* No underline */
+    display: inline-block; /* Proper alignment with icon */
+    margin-right: 15px; /* Space between items */
+}
+
+ul.list-unstyled i {
+    margin-right: 8px; /* Space between icon and text */
+    color: #007bff; /* Primary color for icons */
+}
+
+ul.list-unstyled a:hover {
+    color: #0056b3; /* Darker blue on hover for better interaction */
+}
+
+/* Contact Section Styling */
+#contact {
+    background-color: #f8f9fa; /* Light background for the contact area */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Soft shadow for depth */
+}
+
+/* Glassmorphism for specific sections */
+#hero, #about, #services, #locations, #contact {
+    background: rgba(255, 255, 255, 0.85); /* Light background for readability */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(1px);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+/* Button Styling */
+.btn-primary {
+    background-color: #f2c0e3;
+color:black;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,123,255,0.3);
+}
+
+/* Styling for Forms and Inputs */
+form {
+    background: rgba(250, 250, 250, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+input[type="text"], input[type="email"], textarea {
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+    .navbar-custom {
+        backdrop-filter: none; /* Disable blur on smaller devices for performance */
+    }
+
+    section {
+        margin: 10px;
+    }
+}
+
+/* Color palette derived from the logo */
+:root {
+    --primary-color: #8a96d2; /* Example primary color based on logo */
+    --secondary-color: #fc5c7d; /* Example secondary color based on logo */
+}</style>
 {% endblock %}
