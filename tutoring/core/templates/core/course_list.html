@@ -1,13 +1,57 @@
-<!-- core/templates/core/course_list.html -->
 {% extends 'core/base.html' %}
 
 {% block title %}Courses{% endblock %}
 
 {% block content %}
-<h1>Courses</h1>
-<ul>
-    {% for course in courses %}
-    <li><a href="{% url 'course_detail' course.id %}">{{ course.title }}</a></li>
-    {% endfor %}
-</ul>
+<style>
+/* General Container Styling */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Page Title Styling */
+.page-title {
+    font-size: 2rem;
+    color: #333;
+    border-bottom: 3px solid #007bff;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* Course List Styling */
+.course-list {
+    list-style: none;
+    padding: 0;
+}
+
+.course-item {
+    background-color: #f8f9fa;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-left: 5px solid #007bff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.course-item a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.course-item a:hover {
+    text-decoration: underline;
+}
+</style>
+<div class="container mt-4">
+    <h1 class="page-title">Courses</h1>
+    <ul class="course-list">
+        {% for course in courses %}
+        <li class="course-item"><a href="{% url 'course_detail' course.id %}">{{ course.title }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}
