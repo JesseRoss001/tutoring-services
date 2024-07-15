@@ -21,9 +21,11 @@ class GroupSessionAdmin(admin.ModelAdmin):
     fields = ('title', 'description', 'start_time', 'end_time', 'max_participants', 'cost')
 
 class AvailableHourAdmin(admin.ModelAdmin):
-    list_display = ('day_of_week', 'specific_date', 'start_time', 'end_time', 'is_available')
-    list_filter = ('day_of_week', 'specific_date', 'is_available')
-    fields = ('day_of_week', 'specific_date', 'start_time', 'end_time', 'is_available')
+    list_display = ('day_of_week', 'specific_date', 'start_time', 'end_time', 'is_available', 'is_recurring')
+    list_filter = ('day_of_week', 'is_available', 'is_recurring')
+    search_fields = ('day_of_week', 'specific_date')
+
+
 
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('name', 'email', 'phone')

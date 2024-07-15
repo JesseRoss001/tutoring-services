@@ -6,16 +6,13 @@
 <div class="container mt-5">
     <h1 class="mb-4">Book Available Hour</h1>
     <div class="card">
-        <div class="card-body">
-            <p><strong>Date:</strong> {{ available_hour.specific_date or available_hour.day_of_week }}</p>
-            <p><strong>Time:</strong> {{ available_hour.start_time }} - {{ available_hour.end_time }}</p>
+        <div class="card-body text-center">
+            <h5 class="card-title">{{ hour.specific_date }}: {{ hour.start_time }} - {{ hour.end_time }}</h5>
+            <p><strong>Cost:</strong> ${{ hour.cost }}</p>
             <form method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary">Confirm Booking</button>
             </form>
-            {% if error %}
-                <p class="text-danger mt-3">{{ error }}</p>
-            {% endif %}
         </div>
     </div>
 </div>

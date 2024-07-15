@@ -10,10 +10,10 @@
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body text-center">
-                        <h5 class="card-title">{{ date.strftime('%A, %d %B %Y') }}</h5>
+                        <h5 class="card-title">{{ date|date:"l, d F Y" }}</h5>
                         {% if is_available %}
                             <p class="text-success"><strong>✔ Available</strong></p>
-                            <a href="{% url 'available_hour_detail' date=date.strftime('%Y-%m-%d') %}" class="btn btn-primary">View Hours</a>
+                            <a href="{% url 'available_hour_detail' date=date|date:'Y-m-d' %}" class="btn btn-primary">View Hours</a>
                         {% else %}
                             <p class="text-danger"><strong>✖ No Hours Available</strong></p>
                         {% endif %}

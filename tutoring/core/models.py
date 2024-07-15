@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User 
 from schedule.models import Calendar, Event, Occurrence  # Import from Django-Scheduler
 from payments.models import BasePayment  # Import from Django-Payments
 
@@ -84,7 +85,6 @@ class GroupSession(models.Model):
     def upcoming_group_sessions():
         now = timezone.now()
         return GroupSession.objects.filter(start_time__gte=now).order_by('start_time')
-
 class AvailableHour(models.Model):
     day_of_week = models.CharField(max_length=9, choices=[
         ('Monday', 'Monday'),
@@ -99,6 +99,7 @@ class AvailableHour(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     is_available = models.BooleanField(default=False)  # Not available by default
+    is_recurring = models.BooleanField(default=False)  # New field to handle recurring hours
 
     def __str__(self):
         if self.specific_date:
@@ -109,7 +110,7 @@ class AvailableHour(models.Model):
     def get_available_hours(date):
         day_of_week = date.strftime('%A')
         specific_hours = AvailableHour.objects.filter(specific_date=date, is_available=True)
-        recurring_hours = AvailableHour.objects.filter(day_of_week=day_of_week, is_available=True)
+        recurring_hours = AvailableHour.objects.filter(day_of_week=day_of_week, is_available=True, is_recurring=True)
         return specific_hours | recurring_hours
 
 class Review(models.Model):

@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 from schedule.models import Calendar, Event, Occurrence
 from payments import get_payment_model, RedirectNeeded
 from django.db import models
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 Payment = get_payment_model()
 
@@ -100,9 +102,8 @@ def join_course_session(request, course_session_id):
 
 def available_hours_list(request):
     try:
-        today = timezone.now()
-        next_30_days = [today + timezone.timedelta(days=i) for i in range(30)]
-        available_hours = AvailableHour.get_available_hours(today)
+        today = timezone.now().date()
+        next_30_days = [today + timedelta(days=i) for i in range(30)]
         days_status = {}
         for day in next_30_days:
             hours = AvailableHour.get_available_hours(day)
@@ -113,8 +114,9 @@ def available_hours_list(request):
 
 def available_hour_detail(request, date):
     try:
-        available_hours = AvailableHour.get_available_hours(date)
-        return render(request, 'core/available_hour_detail.html', {'available_hours': available_hours, 'date': date})
+        date_obj = timezone.datetime.strptime(date, '%Y-%m-%d').date()
+        available_hours = AvailableHour.get_available_hours(date_obj)
+        return render(request, 'core/available_hour_detail.html', {'available_hours': available_hours, 'date': date_obj})
     except Exception as e:
         return render(request, 'core/error.html', {'error': str(e)})
 
@@ -134,7 +136,7 @@ def book_available_hour(request, available_hour_id):
                         minute=available_hour.start_time.minute,
                         second=0
                     ),
-                    duration=timezone.timedelta(hours=1),
+                    duration=timedelta(hours=1),
                     event_type='1-to-1',
                     available_slots=1
                 )
