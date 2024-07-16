@@ -1,5 +1,4 @@
 # settings.py for Django Project
-
 import os
 from pathlib import Path
 
@@ -25,10 +24,9 @@ INSTALLED_APPS = [
     'core',  # Your custom app
     'rest_framework',  # Django REST Framework
     'django.contrib.humanize',
-    'schedule',  # Add this line to include the schedule app
-    'payments',  # Add this line to include the payments app
+    'schedule',  # Include the schedule app
+    'payments',  # Include the payments app
 ]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -57,6 +55,16 @@ TEMPLATES = [
         },
     },
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+# Add this to specify where users should be redirected after logging in successfully
+LOGIN_REDIRECT_URL = '/'
+
+# Optional: specify where to go after logging out
+LOGOUT_REDIRECT_URL = '/'
 
 WSGI_APPLICATION = 'tutoring.wsgi.application'
 
@@ -99,6 +107,12 @@ STATIC_ROOT = BASE_DIR / 'collected_static'
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
+
+# Add this to specify where users should be redirected after logging in successfully
+LOGIN_REDIRECT_URL = '/'
+
+# Optional: specify where to go after logging out
+LOGOUT_REDIRECT_URL = '/'
 # Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
@@ -112,11 +126,10 @@ REST_FRAMEWORK = {
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 # Payment settings
 PAYMENT_HOST = 'localhost'
 PAYMENT_USES_SSL = False
-PAYMENT_MODEL = 'core.Payment'
+PAYMENT_MODEL = 'core.Payment'  # Ensure this is correctly pointing to your Payment model
 PAYMENT_VARIANTS = {
     'default': ('payments.dummy.DummyProvider', {})
 }

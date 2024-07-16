@@ -1,0 +1,99 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load socialaccount %}
+
+{% block content %}
+<style>
+body {
+    background-color: #f9f9f9;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.container {
+    max-width: 400px;
+    margin: 5% auto;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+}
+
+form {
+    margin-top: 20px;
+}
+
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 4px;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+.form-footer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.third-party-login {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.third-party-login a {
+    display: inline-block;
+    background: #db4437;
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.third-party-login a:hover {
+    background: #c23321;
+}
+
+a {
+    color: dodgerblue;
+}
+
+a:hover {
+    opacity: 0.8;
+}
+</style>
+
+<div class="container">
+    <h2>Sign In</h2>
+    <form method="post" action="{% url 'account_login' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Sign In</button>
+        <a href="{% url 'account_reset_password' %}">Forgot your password?</a>
+    </form>
+    <hr>
+    <h4>Or use a third-party</h4>
+    {% providers_media_tags %}
+</div>
+{% endblock %}

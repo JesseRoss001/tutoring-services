@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User 
 from schedule.models import Calendar, Event, Occurrence  # Import from Django-Scheduler
 from payments.models import BasePayment  # Import from Django-Payments
-
+from phonenumber_field.modelfields import PhoneNumberField
 
 class Course(models.Model):
     title = models.CharField(max_length=100)
@@ -31,7 +31,7 @@ class CourseSession(models.Model):
 class Student(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField()
-    phone = models.CharField(max_length=15)
+    phone = PhoneNumberField(region='GB')  # Ensure this is set to GB for UK
 
     def __str__(self):
         return self.name
@@ -52,8 +52,13 @@ class Session(models.Model):
     def __str__(self):
         return f"{self.event_type} - {self.date.strftime('%Y-%m-%d %H:%M')}"
 
-class Payment(BasePayment):
-    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+class Payment(models.Model):
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    # Add other fields as necessary
+
+    def __str__(self):
+        return f"Payment of {self.amount} on {self.timestamp}"
 
 class LiveStream(models.Model):
     title = models.CharField(max_length=200)

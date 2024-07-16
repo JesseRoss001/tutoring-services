@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from rest_framework import viewsets
 from .models import Product, Course, Session, Review, LiveStream, Student, AvailableHour, GroupSession, CourseSession
 from .serializers import ProductSerializer
@@ -190,3 +191,31 @@ def event_detail(request, event_id):
         return render(request, 'core/event_detail.html', {'event': event})
     except Exception as e:
         return render(request, 'core/error.html', {'error': str(e)})
+
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+    return render(request, 'core/signup.html', {'form': form})
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'core/login.html', {'form': form})
+
+def logout_view(request):
+    if request.method == 'POST':
+        logout(request)
+        return redirect('home')
