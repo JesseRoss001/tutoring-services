@@ -18,6 +18,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -78,34 +79,7 @@ def course_list(request):
     except Exception as e:
         return render(request, 'core/error.html', {'error': str(e)})
 
-def course_detail(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
 
-    if request.method == 'POST':
-        try:
-            # Create a Stripe Checkout Session
-            session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[{
-                    'price_data': {
-                        'currency': 'gbp',
-                        'product_data': {
-                            'name': course.title,
-                        },
-                        'unit_amount': int(course.price * 100),
-                    },
-                    'quantity': 1,
-                }],
-                mode='payment',
-                success_url=request.build_absolute_uri('/') + '?success=true',
-                cancel_url=request.build_absolute_uri('/') + '?canceled=true',
-            )
-
-            return redirect(session.url)
-        except Exception as e:
-            return render(request, 'core/error.html', {'error': str(e)})
-
-    return render(request, 'core/course_detail.html', {'course': course, 'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY})
 
 def course_session_list(request):
     try:
@@ -252,56 +226,76 @@ def logout_view(request):
     if request.method == 'POST':
         logout(request)
         return redirect('home')
-    
-# views.py
+
+def course_detail(request, course_id):
+    """ Display course detail page with Stripe payment option. """
+    course = get_object_or_404(Course, id=course_id)
+    if request.method == 'POST':
+        return create_stripe_checkout_session(request, course)
+    return render(request, 'core/course_detail.html', {
+        'course': course, 
+        'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY
+    })
+
+@csrf_exempt  # Since you're calling this from AJAX, ensure CSRF is handled correctly.
+@require_http_methods(["POST"])
+def create_stripe_checkout_session(request):
+    try:
+        data = json.loads(request.body)
+        course_id = data.get('course_id')
+        course = Course.objects.get(id=course_id)  # Get the course based on the ID
+
+        amount = int(course.price * 100)  # Convert price to cents
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'gbp',
+                    'product_data': {'name': course.title},
+                    'unit_amount': amount,
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=request.build_absolute_uri('/') + '?success=true',
+            cancel_url=request.build_absolute_uri('/') + '?canceled=true',
+        )
+        return JsonResponse({'id': session.id})
+    except Course.DoesNotExist:
+        return JsonResponse({'error': 'Course not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
 @csrf_exempt
 def stripe_webhook(request):
+    """ Handle Stripe webhook calls. """
     payload = request.body
-    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
-    event = None
-
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     try:
-        event = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
-    except ValueError:
-        return HttpResponse(status=400)
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+        if event['type'] == 'checkout.session.completed':
+            handle_checkout_session(event['data']['object'])
     except stripe.error.SignatureVerificationError:
-        return HttpResponse(status=400)
-
-    # Handle the completed checkout session
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        # Here you would look up the course using session.metadata, and enroll the user
-        handle_checkout_session(session)
-
-    return HttpResponse(status=200)
+        return HttpResponse('Invalid signature', status=400)
+    except ValueError:
+        return HttpResponse('Invalid payload', status=400)
+    return HttpResponse('Webhook received', status=200)
 
 def handle_checkout_session(session):
-    # Dummy function to process session
-    pass
-
-def process_checkout_session(session):
+    """ Process Stripe session after successful payment. """
     try:
         customer_email = session.get('customer_email')
         course_session_id = session.get('metadata').get('course_session_id')
-        student = Student.objects.get(email=customer_email)
+        student, created = Student.objects.get_or_create(email=customer_email)
         course_session = CourseSession.objects.get(id=course_session_id)
-
         Payment.objects.create(
             student=student,
             course_session=course_session,
-            amount=course_session.cost,
-            timestamp=timezone.now()
+            amount=course_session.cost
         )
-
         course_session.students.add(student)
-        course_session.save()
-
-    except CourseSession.DoesNotExist:
-        # Handle missing course session
-        logger.error(f"Course session {course_session_id} not found")
-    except Student.DoesNotExist:
-        # Handle missing student
-        logger.error(f"Student with email {customer_email} not found")
     except Exception as e:
-        # Log unexpected errors
-        logger.error(f"Error processing payment: {str(e)}")
+        # Handle errors
+        pass

@@ -13,25 +13,32 @@
     <p class="course-description">{{ course.description }}</p>
 </div>
 
-
-
 <script src="https://js.stripe.com/v3/"></script>
 <script>
+    // Get CSRF token from Django context
+    var csrftoken = '{{ csrf_token }}';
+
     var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
     var checkoutButton = document.getElementById('checkout-button');
+
     checkoutButton.addEventListener('click', function () {
-        // Assume the creation of a checkout session ID is triggered by some server-side logic
-        fetch('/path/to/create-checkout-session/', { method: 'POST' })
+        fetch('/create-checkout-session/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({course_id: '{{ course.id }}'})  // Send the course ID
+        })
         .then(function (response) {
             return response.json();
         })
         .then(function (session) {
             return stripe.redirectToCheckout({ sessionId: session.id });
         })
-        .then(function (result) {
-            if (result.error) {
-                alert(result.error.message);
-            }
+        .catch(function (error) {
+            console.error('Error:', error);
+            alert('Payment initiation failed.');
         });
     });
 </script>
@@ -41,53 +48,53 @@
 </div>
 {% endif %}
 <style>
-/* Course Detail Page Specific Styling */
-.course-detail {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+    /* Course Detail Page Specific Styling */
+    .course-detail {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
-.course-title {
-    font-size: 2.5rem;
-    color: #0056b3; /* Deep blue to attract attention to the title */
-    margin-bottom: 20px;
-}
+    .course-title {
+        font-size: 2.5rem;
+        color: #0056b3; /* Deep blue to attract attention to the title */
+        margin-bottom: 20px;
+    }
 
-.course-meta {
-    font-size: 1.2rem;
-    color: #666;
-    margin-bottom: 20px;
-}
+    .course-meta {
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 20px;
+    }
 
-.course-price {
-    font-weight: bold;
-    color: #28a745; /* Green color for price to highlight monetary aspect */
-}
+    .course-price {
+        font-weight: bold;
+        color: #28a745; /* Green color for price to highlight monetary aspect */
+    }
 
-#checkout-button {
-    padding: 10px 20px;
-    color: #fff;
-    background-color: #007bff; /* Bootstrap primary blue */
-    border-color: #007bff;
-    border-radius: 5px;
-    font-size: 1rem;
-    text-align: center;
-    vertical-align: middle;
-    user-select: none;
-    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
-}
+    #checkout-button {
+        padding: 10px 20px;
+        color: #fff;
+        background-color: #007bff; /* Bootstrap primary blue */
+        border-color: #007bff;
+        border-radius: 5px;
+        font-size: 1rem;
+        text-align: center;
+        vertical-align: middle;
+        user-select: none;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+    }
 
-#checkout-button:hover {
-    background-color: #0056b3;
-    border-color: #004085;
-}
+    #checkout-button:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
 
-.course-description {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: #333;
-}
+    .course-description {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #333;
+    }
 </style>
 {% endblock %}

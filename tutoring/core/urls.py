@@ -2,7 +2,7 @@ from django.conf import settings
 from django.urls import path, include
 from . import views
 from rest_framework.routers import DefaultRouter
-from .views import ProductViewSet
+from .views import ProductViewSet, create_stripe_checkout_session
 from django.conf.urls.static import static
 
 router = DefaultRouter()
@@ -33,6 +33,7 @@ urlpatterns = [
     path('schedule/', include('schedule.urls')),  # Include the schedule URLs
     path('payments/', include('payments.urls')),  # Include the payment URLs
     path('event/<int:event_id>/', views.event_detail, name='event_detail'),
+    path('create-checkout-session/', views.create_stripe_checkout_session, name='create-checkout-session'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Include the router URLs

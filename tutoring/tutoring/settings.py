@@ -12,7 +12,11 @@ STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'sk_test_51PPYhKKmcdX5hfexAhN
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Allowed hosts defines which host/domain names that this Django site can serve.
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+
+# CSRF Trusted Origins adds the HTTP origins that are trusted to send the CSRF token.
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
 
 # Application definition
 INSTALLED_APPS = [
