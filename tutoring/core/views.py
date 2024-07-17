@@ -1,20 +1,31 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
+from django.http import HttpResponse
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from rest_framework import viewsets
 from .models import Product, Course, Session, Review, LiveStream, Student, AvailableHour, GroupSession, CourseSession
 from .serializers import ProductSerializer
 from django.core.paginator import Paginator
 import json
+import stripe
+from django.conf import settings
 from django.utils import timezone
 from datetime import datetime, timedelta
 from schedule.models import Calendar, Event, Occurrence
 from payments import get_payment_model, RedirectNeeded
 from django.db import models
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, logout
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
 
 Payment = get_payment_model()
+
+
+
 
 def home(request):
     return render(request, 'core/home.html')
@@ -68,11 +79,33 @@ def course_list(request):
         return render(request, 'core/error.html', {'error': str(e)})
 
 def course_detail(request, course_id):
-    try:
-        course = get_object_or_404(Course, id=course_id)
-        return render(request, 'core/course_detail.html', {'course': course})
-    except Exception as e:
-        return render(request, 'core/error.html', {'error': str(e)})
+    course = get_object_or_404(Course, id=course_id)
+
+    if request.method == 'POST':
+        try:
+            # Create a Stripe Checkout Session
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'gbp',
+                        'product_data': {
+                            'name': course.title,
+                        },
+                        'unit_amount': int(course.price * 100),
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=request.build_absolute_uri('/') + '?success=true',
+                cancel_url=request.build_absolute_uri('/') + '?canceled=true',
+            )
+
+            return redirect(session.url)
+        except Exception as e:
+            return render(request, 'core/error.html', {'error': str(e)})
+
+    return render(request, 'core/course_detail.html', {'course': course, 'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY})
 
 def course_session_list(request):
     try:
@@ -219,3 +252,56 @@ def logout_view(request):
     if request.method == 'POST':
         logout(request)
         return redirect('home')
+    
+# views.py
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
+    except ValueError:
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError:
+        return HttpResponse(status=400)
+
+    # Handle the completed checkout session
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        # Here you would look up the course using session.metadata, and enroll the user
+        handle_checkout_session(session)
+
+    return HttpResponse(status=200)
+
+def handle_checkout_session(session):
+    # Dummy function to process session
+    pass
+
+def process_checkout_session(session):
+    try:
+        customer_email = session.get('customer_email')
+        course_session_id = session.get('metadata').get('course_session_id')
+        student = Student.objects.get(email=customer_email)
+        course_session = CourseSession.objects.get(id=course_session_id)
+
+        Payment.objects.create(
+            student=student,
+            course_session=course_session,
+            amount=course_session.cost,
+            timestamp=timezone.now()
+        )
+
+        course_session.students.add(student)
+        course_session.save()
+
+    except CourseSession.DoesNotExist:
+        # Handle missing course session
+        logger.error(f"Course session {course_session_id} not found")
+    except Student.DoesNotExist:
+        # Handle missing student
+        logger.error(f"Student with email {customer_email} not found")
+    except Exception as e:
+        # Log unexpected errors
+        logger.error(f"Error processing payment: {str(e)}")

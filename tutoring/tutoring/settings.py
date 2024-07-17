@@ -7,7 +7,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-lg7rm)52fow)9)ud08l9@+wj70r#-*)e2cs!n7*kcr584$_l3n'
-
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', 'pk_test_51PPYhKKmcdX5hfexZoWXMaCyow4EvjY6zyztJdsp5mJbVYuFkVT7Rj4GA7gdT6K64njxudFtWjRDu8W1vO8RAU7V00E0prD9Wi')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'sk_test_51PPYhKKmcdX5hfexAhNnhOzvKB1g2OXOdJvgUzN9Nh20igw3x95Fzuot3ERqTQYVNMagQFhgJTCArhxeHL4LGGbb00xdBioarF')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -125,6 +126,8 @@ REST_FRAMEWORK = {
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# settings.py
+
 
 # Payment settings
 PAYMENT_HOST = 'localhost'

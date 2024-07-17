@@ -53,12 +53,13 @@ class Session(models.Model):
         return f"{self.event_type} - {self.date.strftime('%Y-%m-%d %H:%M')}"
 
 class Payment(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    course_session = models.ForeignKey(CourseSession, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     timestamp = models.DateTimeField(auto_now_add=True)
-    # Add other fields as necessary
 
     def __str__(self):
-        return f"Payment of {self.amount} on {self.timestamp}"
+        return f"Payment of {self.amount} on {self.timestamp} for {self.course_session.course.title}"
 
 class LiveStream(models.Model):
     title = models.CharField(max_length=200)

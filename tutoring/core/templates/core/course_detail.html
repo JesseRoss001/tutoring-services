@@ -7,11 +7,40 @@
     <h1 class="course-title">{{ course.title }}</h1>
     <div class="course-meta">
         <span class="course-price">Price: £{{ course.price }}</span>
+        <!-- Stripe Checkout Button -->
+        <button id="checkout-button" class="btn btn-primary">Pay with Stripe</button>
     </div>
     <p class="course-description">{{ course.description }}</p>
 </div>
-<style>
 
+
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+    var checkoutButton = document.getElementById('checkout-button');
+    checkoutButton.addEventListener('click', function () {
+        // Assume the creation of a checkout session ID is triggered by some server-side logic
+        fetch('/path/to/create-checkout-session/', { method: 'POST' })
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (session) {
+            return stripe.redirectToCheckout({ sessionId: session.id });
+        })
+        .then(function (result) {
+            if (result.error) {
+                alert(result.error.message);
+            }
+        });
+    });
+</script>
+{% if request.GET.success %}
+<div class="alert alert-success" role="alert">
+    You have officially enrolled in {{ course.title }}.
+</div>
+{% endif %}
+<style>
 /* Course Detail Page Specific Styling */
 .course-detail {
     background: #fff;
@@ -35,6 +64,24 @@
 .course-price {
     font-weight: bold;
     color: #28a745; /* Green color for price to highlight monetary aspect */
+}
+
+#checkout-button {
+    padding: 10px 20px;
+    color: #fff;
+    background-color: #007bff; /* Bootstrap primary blue */
+    border-color: #007bff;
+    border-radius: 5px;
+    font-size: 1rem;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+#checkout-button:hover {
+    background-color: #0056b3;
+    border-color: #004085;
 }
 
 .course-description {
