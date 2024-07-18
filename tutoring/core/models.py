@@ -14,52 +14,50 @@ class Course(models.Model):
         return self.title
 
 class CourseSession(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, related_name='sessions', on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     max_participants = models.PositiveIntegerField()
-    cost = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+    meeting_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.course.title} - {self.start_time.strftime('%Y-%m-%d %H:%M')}"
-
-    @staticmethod
-    def upcoming_course_sessions():
-        now = timezone.now()
-        return CourseSession.objects.filter(start_time__gte=now).order_by('start_time')
+        return f"{self.course.title} Session on {self.start_time.strftime('%Y-%m-%d %H:%M')}"
 
 class Student(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField()
-    phone = PhoneNumberField(region='GB')  # Ensure this is set to GB for UK
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
+    email = models.EmailField(unique=False, null=True, blank=True)  # Removed unique constraint for migration
+    phone = PhoneNumberField(blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return self.user.username if self.user else 'Unnamed Student'
+
+class Enrollment(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    enrolled_date = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.student.name} enrolled in {self.course.title} on {self.enrolled_date}"
 
 class Session(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True)
-    date = models.DateTimeField()
-    duration = models.DurationField()
-    event_type = models.CharField(max_length=20, choices=[
-        ('1-to-1', '1-to-1'),
-        ('group', 'Group'),
-        ('live_stream', 'Live Stream'),
-        ('testing', 'Testing')
-    ])
-    description = models.TextField(blank=True)
-    available_slots = models.PositiveIntegerField(default=1)
+    title = models.CharField(max_length=200)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    participants = models.ManyToManyField(Student)
 
     def __str__(self):
-        return f"{self.event_type} - {self.date.strftime('%Y-%m-%d %H:%M')}"
+        return f"{self.title} from {self.start_time} to {self.end_time}"
 
 class Payment(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    course_session = models.ForeignKey(CourseSession, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Payment of {self.amount} on {self.timestamp} for {self.course_session.course.title}"
+        return f"Payment of {self.amount} by {self.student.name} for {self.course.title}"
+
 
 class LiveStream(models.Model):
     title = models.CharField(max_length=200)
