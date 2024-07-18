@@ -34,7 +34,7 @@ class Student(models.Model):
 
 class Enrollment(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
     enrolled_date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):

@@ -2,21 +2,73 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="mb-4">Course Sessions</h1>
-    <div class="row">
-        {% for session in course_sessions %}
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ session.course.title }}</h5>
-                        <p class="card-text"><strong>Start Time:</strong> {{ session.start_time }}</p>
-                        <p class="card-text"><strong>End Time:</strong> {{ session.end_time }}</p>
-                        <p class="card-text"><strong>Cost:</strong> ${{ session.cost }}</p>
-                        <a href="{% url 'course_session_detail' session.id %}" class="btn btn-primary">View Details</a>
+    <h1 class="mb-4 text-center">Course Sessions</h1>
+    {% if course_sessions %}
+        <div class="row">
+            {% for session in course_sessions %}
+                {% if session.user_enrolled %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 shadow">
+                            {% if session.course.image %}
+                                <img src="{{ session.course.image.url }}" class="card-img-top" alt="{{ session.course.title }}">
+                            {% else %}
+                                <img src="https://via.placeholder.com/150" class="card-img-top" alt="Default Image">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ session.course.title }}</h5>
+                                <p class="card-text"><strong>Start:</strong> {{ session.start_time|date:"N j, Y, P" }}</p>
+                                <p class="card-text"><strong>End:</strong> {{ session.end_time|date:"N j, Y, P" }}</p>
+                                <p class="card-text"><strong>Participants:</strong> {{ session.max_participants }}</p>
+                                {% if session.meeting_url %}
+                                    <p class="card-text"><strong>Meeting URL:</strong> <a href="{{ session.meeting_url }}" target="_blank">Join Session</a></p>
+                                {% endif %}
+                                <a href="{% url 'course_session_detail' session.id %}" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center" role="alert">
+            No course sessions are available at the moment.
+        </div>
+    {% endif %}
 </div>
+
+<style>
+    .container {
+        max-width: 1200px;
+    }
+
+    .card-img-top {
+        width: 100%;
+        height: 200px; /* Fixed height for better layout */
+        object-fit: cover; /* Ensures the image covers the area without distorting aspect ratio */
+    }
+
+    .card h5 {
+        color: #0056b3; /* Dark blue for titles */
+    }
+
+    .card-text {
+        font-size: 0.9rem; /* Slightly smaller font size for card text */
+    }
+
+    .btn-primary {
+        background-color: #4CAF50; /* Green for primary buttons */
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #45a049; /* Darker green on hover */
+    }
+
+    .alert-info {
+        background-color: #f2f2f2; /* Light grey background for the alert */
+        color: #333; /* Dark text for better readability */
+        padding: 20px;
+        border: 1px solid #ccc;
+    }
+</style>
 {% endblock %}

@@ -29,9 +29,14 @@ Payment = get_payment_model()
 
 
 
-
 def home(request):
-    return render(request, 'core/home.html')
+    user_courses = False  # Default to no courses
+    if request.user.is_authenticated:
+        # Only query enrollments if the user is logged in
+        user_courses = Enrollment.objects.filter(student__user=request.user).exists()
+    
+    return render(request, 'core/home.html', {'user_courses': user_courses})
+
 
 def live_stream_list(request):
     try:
@@ -83,12 +88,38 @@ def course_list(request):
 
 
 
+
+@login_required
 def course_session_list(request):
-    try:
-        course_sessions = CourseSession.upcoming_course_sessions()
-        return render(request, 'core/course_session_list.html', {'course_sessions': course_sessions})
-    except Exception as e:
-        return render(request, 'core/error.html', {'error': str(e)})
+    user = request.user
+    if hasattr(user, 'student'):
+        # Get the student object
+        student = user.student
+
+        # Get the courses the student is enrolled in
+        enrolled_courses_ids = list(Enrollment.objects.filter(student=student).values_list('course_id', flat=True))
+
+        # Debug: print the enrolled courses
+        print("User Enrolled Courses IDs:", enrolled_courses_ids)
+
+        # Get all course sessions
+        course_sessions = CourseSession.objects.all()
+
+        # Annotate each session with whether the user is enrolled in the course
+        for session in course_sessions:
+            session.user_enrolled = session.course.id in enrolled_courses_ids
+            # Debug: print the course sessions and enrollment status
+            print(f"Session: {session.course.title} Session on {session.start_time}, User Enrolled: {session.user_enrolled}")
+
+        context = {'course_sessions': course_sessions}
+        return render(request, 'core/course_session_list.html', context)
+    else:
+        # If the user is not a student, redirect or show an error
+        print("User is not a student")
+        return render(request, 'core/course_session_list.html', {'course_sessions': []})
+
+
+
 
 def course_session_detail(request, course_session_id):
     try:
