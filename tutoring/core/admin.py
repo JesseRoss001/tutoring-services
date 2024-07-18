@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
-from .models import Product, Course, Session, Review, LiveStream, Student, AvailableHour, GroupSession, CourseSession, Payment
+from .models import Product, Course, Session, Review, LiveStream, Student, AvailableHour, GroupSession, CourseSession, Payment, Enrollment
 
 
 # Helper function to handle repeated registrations
@@ -65,6 +65,11 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ('session', 'status', 'total')
     search_fields = ('session__student__name',)
     list_filter = ('status', 'created')
+    
+class EnrollmentAdmin(admin.ModelAdmin):
+    list_display = ('student', 'course', 'enrolled_date')
+    search_fields = ('student__name', 'course__title')
+    list_filter = ('enrolled_date', 'course')
 
 # Register all models using the helper function to handle any AlreadyRegistered errors
 register_admin(Course, CourseAdmin)
@@ -77,3 +82,4 @@ register_admin(Product, ProductAdmin)
 register_admin(LiveStream, LiveStreamAdmin)
 register_admin(Payment, PaymentAdmin)
 register_admin(AvailableHour, AvailableHourAdmin)
+admin.site.register(Enrollment, EnrollmentAdmin)

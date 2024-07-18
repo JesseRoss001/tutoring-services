@@ -9,7 +9,7 @@
         <span class="course-price">Price: £{{ course.price }}</span>
     </div>
     {% if user.is_authenticated %}
-        <button id="checkout-button" class="btn btn-primary btn-small m-3 p-2 px-4"> Pay </button>
+        <button id="checkout-button" class="btn btn-primary btn-block">Pay with Stripe</button>
     {% else %}
         <div class="alert alert-info" role="alert">
             Please <a href="{% url 'login' %}">log in</a> or <a href="{% url 'signup' %}">sign up</a> to purchase this course.
@@ -20,25 +20,34 @@
 
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    // Get CSRF token from Django context
+    // CSRF token initialization for AJAX requests
     var csrftoken = '{{ csrf_token }}';
+    
+    // Initialize Stripe with your Stripe public key
     var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
-    var checkoutButton = document.getElementById('checkout-button');
 
-    checkoutButton.addEventListener('click', function () {
+    document.getElementById('checkout-button').addEventListener('click', function () {
+        // Post request to server to create a checkout session
         fetch('/create-checkout-session/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrftoken
             },
-            body: JSON.stringify({course_id: '{{ course.id }}'})
+            body: JSON.stringify({ course_id: '{{ course.id }}' })
         })
         .then(function (response) {
             return response.json();
         })
-        .then(function (session) {
-            return stripe.redirectToCheckout({ sessionId: session.id });
+        .then(function (data) {
+            if (data.sessionId) {
+                // Redirect to Stripe Checkout
+                stripe.redirectToCheckout({ sessionId: data.sessionId });
+            } else {
+                // Log errors or inform the user if session creation failed
+                console.error('Session creation failed:', data.error);
+                alert('Payment initiation failed: ' + data.error);
+            }
         })
         .catch(function (error) {
             console.error('Error:', error);
@@ -74,21 +83,20 @@
 
     .course-price {
         font-weight: bold;
-        color: #28a745;
+        color: #28a745; /* Green color for price to highlight monetary aspect */
     }
 
     #checkout-button {
-        display: block; /* Makes the button span the full container width */
-      
-    
+        padding: 10px 20px;
         color: #fff;
-        background-color: #007bff;
+        background-color: #007bff; /* Bootstrap primary blue */
         border-color: #007bff;
         border-radius: 5px;
-        font-size: 1.2rem;
+        font-size: 1rem;
         text-align: center;
+        vertical-align: middle;
         user-select: none;
-        transition: background-color 0.3s, border-color 0.3s;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
     }
 
     #checkout-button:hover {

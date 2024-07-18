@@ -121,9 +121,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'course_list' %}">Courses</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'course_session_list' %}">Course Sessions</a>
-                    </li>
+                    {% if user.is_authenticated and user_courses %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'course_session_list' %}">Course Sessions</a>
+                        </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'group_session_list' %}">Group Sessions</a>
                     </li>

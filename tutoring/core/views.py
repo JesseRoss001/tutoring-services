@@ -1,9 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
+from django.urls import reverse
 from django.http import HttpResponse
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.models import User
 from rest_framework import viewsets
-from .models import Product, Course, Session, Review, LiveStream, Student, AvailableHour, GroupSession, CourseSession
+from .models import Product, Course, Session, Review, LiveStream, Student, AvailableHour, GroupSession, CourseSession, Payment, Enrollment
 from .serializers import ProductSerializer
 from django.core.paginator import Paginator
 import json
@@ -228,74 +230,65 @@ def logout_view(request):
         return redirect('home')
 
 def course_detail(request, course_id):
-    """ Display course detail page with Stripe payment option. """
+    """Display course detail page with Stripe payment option."""
     course = get_object_or_404(Course, id=course_id)
-    if request.method == 'POST':
-        return create_stripe_checkout_session(request, course)
     return render(request, 'core/course_detail.html', {
         'course': course, 
         'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY
     })
 
-@csrf_exempt  # Since you're calling this from AJAX, ensure CSRF is handled correctly.
+@csrf_exempt
 @require_http_methods(["POST"])
 def create_stripe_checkout_session(request):
-    try:
-        data = json.loads(request.body)
-        course_id = data.get('course_id')
-        course = Course.objects.get(id=course_id)  # Get the course based on the ID
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'User must be authenticated'}, status=403)
 
-        amount = int(course.price * 100)  # Convert price to cents
+    try:
+        body = json.loads(request.body)
+        course_id = body.get('course_id')
+        course = Course.objects.get(id=course_id)
+        success_url = request.build_absolute_uri(reverse('payment_success')) + '?session_id={CHECKOUT_SESSION_ID}'
+        cancel_url = request.build_absolute_uri(reverse('payment_cancel'))
+
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
                 'price_data': {
                     'currency': 'gbp',
                     'product_data': {'name': course.title},
-                    'unit_amount': amount,
+                    'unit_amount': int(course.price * 100),
                 },
                 'quantity': 1,
             }],
             mode='payment',
-            success_url=request.build_absolute_uri('/') + '?success=true',
-            cancel_url=request.build_absolute_uri('/') + '?canceled=true',
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={'course_id': course_id, 'user_id': request.user.id}
         )
-        return JsonResponse({'id': session.id})
+        return JsonResponse({'sessionId': session.id})
     except Course.DoesNotExist:
         return JsonResponse({'error': 'Course not found'}, status=404)
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({'error': str(e)}, status=500)
+    
 
-@csrf_exempt
-def stripe_webhook(request):
-    """ Handle Stripe webhook calls. """
-    payload = request.body
-    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
-        )
-        if event['type'] == 'checkout.session.completed':
-            handle_checkout_session(event['data']['object'])
-    except stripe.error.SignatureVerificationError:
-        return HttpResponse('Invalid signature', status=400)
-    except ValueError:
-        return HttpResponse('Invalid payload', status=400)
-    return HttpResponse('Webhook received', status=200)
+def payment_success(request):
+    session_id = request.GET.get('session_id')
+    session = stripe.checkout.Session.retrieve(session_id)
 
-def handle_checkout_session(session):
-    """ Process Stripe session after successful payment. """
-    try:
-        customer_email = session.get('customer_email')
-        course_session_id = session.get('metadata').get('course_session_id')
-        student, created = Student.objects.get_or_create(email=customer_email)
-        course_session = CourseSession.objects.get(id=course_session_id)
-        Payment.objects.create(
-            student=student,
-            course_session=course_session,
-            amount=course_session.cost
-        )
-        course_session.students.add(student)
-    except Exception as e:
-        # Handle errors
-        pass
+    if session.payment_status == 'paid':
+        metadata = session.metadata
+        course_id = metadata['course_id']
+        user_id = metadata['user_id']
+
+        course = Course.objects.get(id=course_id)
+        user = User.objects.get(id=user_id)
+        student, created = Student.objects.get_or_create(user=user)
+
+        Enrollment.objects.create(student=student, course=course)
+        return render(request, 'core/payment_success.html', {'course': course})
+    else:
+        return HttpResponse('Payment failed or cancelled', status=400)
+    
+def payment_cancel(request):
+    return render(request, 'core/payment_cancel.html')
