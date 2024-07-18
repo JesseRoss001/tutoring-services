@@ -7,9 +7,14 @@
     <h1 class="course-title">{{ course.title }}</h1>
     <div class="course-meta">
         <span class="course-price">Price: £{{ course.price }}</span>
-        <!-- Stripe Checkout Button -->
-        <button id="checkout-button" class="btn btn-primary">Pay with Stripe</button>
     </div>
+    {% if user.is_authenticated %}
+        <button id="checkout-button" class="btn btn-primary btn-small m-3 p-2 px-4"> Pay </button>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            Please <a href="{% url 'login' %}">log in</a> or <a href="{% url 'signup' %}">sign up</a> to purchase this course.
+        </div>
+    {% endif %}
     <p class="course-description">{{ course.description }}</p>
 </div>
 
@@ -17,7 +22,6 @@
 <script>
     // Get CSRF token from Django context
     var csrftoken = '{{ csrf_token }}';
-
     var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
     var checkoutButton = document.getElementById('checkout-button');
 
@@ -28,7 +32,7 @@
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrftoken
             },
-            body: JSON.stringify({course_id: '{{ course.id }}'})  // Send the course ID
+            body: JSON.stringify({course_id: '{{ course.id }}'})
         })
         .then(function (response) {
             return response.json();
@@ -58,7 +62,7 @@
 
     .course-title {
         font-size: 2.5rem;
-        color: #0056b3; /* Deep blue to attract attention to the title */
+        color: #0056b3;
         margin-bottom: 20px;
     }
 
@@ -70,20 +74,21 @@
 
     .course-price {
         font-weight: bold;
-        color: #28a745; /* Green color for price to highlight monetary aspect */
+        color: #28a745;
     }
 
     #checkout-button {
-        padding: 10px 20px;
+        display: block; /* Makes the button span the full container width */
+      
+    
         color: #fff;
-        background-color: #007bff; /* Bootstrap primary blue */
+        background-color: #007bff;
         border-color: #007bff;
         border-radius: 5px;
-        font-size: 1rem;
+        font-size: 1.2rem;
         text-align: center;
-        vertical-align: middle;
         user-select: none;
-        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+        transition: background-color 0.3s, border-color 0.3s;
     }
 
     #checkout-button:hover {
