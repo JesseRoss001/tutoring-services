@@ -6,27 +6,25 @@
     {% if course_sessions %}
         <div class="row">
             {% for session in course_sessions %}
-                {% if session.user_enrolled %}
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100 shadow">
-                            {% if session.course.image %}
-                                <img src="{{ session.course.image.url }}" class="card-img-top" alt="{{ session.course.title }}">
-                            {% else %}
-                                <img src="https://via.placeholder.com/150" class="card-img-top" alt="Default Image">
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow">
+                        {% if session.course.image %}
+                            <img src="{{ session.course.image.url }}" class="card-img-top" alt="{{ session.course.title }}">
+                        {% else %}
+                            <img src="https://via.placeholder.com/150" class="card-img-top" alt="Default Image">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ session.course.title }}</h5>
+                            <p class="card-text"><strong>Start:</strong> {{ session.start_time|date:"N j, Y, P" }}</p>
+                            <p class="card-text"><strong>End:</strong> {{ session.end_time|date:"N j, Y, P" }}</p>
+                            <p class="card-text"><strong>Participants:</strong> {{ session.max_participants }}</p>
+                            {% if session.meeting_url %}
+                                <p class="card-text"><strong>Meeting URL:</strong> <a href="{{ session.meeting_url }}" target="_blank">Join Session</a></p>
                             {% endif %}
-                            <div class="card-body">
-                                <h5 class="card-title">{{ session.course.title }}</h5>
-                                <p class="card-text"><strong>Start:</strong> {{ session.start_time|date:"N j, Y, P" }}</p>
-                                <p class="card-text"><strong>End:</strong> {{ session.end_time|date:"N j, Y, P" }}</p>
-                                <p class="card-text"><strong>Participants:</strong> {{ session.max_participants }}</p>
-                                {% if session.meeting_url %}
-                                    <p class="card-text"><strong>Meeting URL:</strong> <a href="{{ session.meeting_url }}" target="_blank">Join Session</a></p>
-                                {% endif %}
-                                <a href="{% url 'course_session_detail' session.id %}" class="btn btn-primary">View Details</a>
-                            </div>
+                            <a href="{% url 'course_session_detail' session.id %}" class="btn btn-primary">View Details</a>
                         </div>
                     </div>
-                {% endif %}
+                </div>
             {% endfor %}
         </div>
     {% else %}

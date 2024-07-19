@@ -93,28 +93,23 @@ def course_list(request):
 def course_session_list(request):
     user = request.user
     if hasattr(user, 'student'):
-        # Get the student object
         student = user.student
-
-        # Get the courses the student is enrolled in
         enrolled_courses_ids = list(Enrollment.objects.filter(student=student).values_list('course_id', flat=True))
 
-        # Debug: print the enrolled courses
-        print("User Enrolled Courses IDs:", enrolled_courses_ids)
+        # Debugging: Detailed information
+        print(f"User: {user.username}, Student ID: {student.id}")
+        print(f"Enrolled Course IDs: {enrolled_courses_ids}")
 
-        # Get all course sessions
-        course_sessions = CourseSession.objects.all()
+        # Query course sessions for enrolled courses
+        course_sessions = CourseSession.objects.filter(course_id__in=enrolled_courses_ids)
 
-        # Annotate each session with whether the user is enrolled in the course
+        # Debug: Print each session's details
         for session in course_sessions:
-            session.user_enrolled = session.course.id in enrolled_courses_ids
-            # Debug: print the course sessions and enrollment status
-            print(f"Session: {session.course.title} Session on {session.start_time}, User Enrolled: {session.user_enrolled}")
+            print(f"Session: {session.course.title} on {session.start_time}, Course ID: {session.course.id}")
 
         context = {'course_sessions': course_sessions}
         return render(request, 'core/course_session_list.html', context)
     else:
-        # If the user is not a student, redirect or show an error
         print("User is not a student")
         return render(request, 'core/course_session_list.html', {'course_sessions': []})
 
