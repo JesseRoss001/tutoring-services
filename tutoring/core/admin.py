@@ -22,7 +22,7 @@ class CourseSessionAdmin(admin.ModelAdmin):
     ordering = ('-start_time',)
 
 class GroupSessionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'start_time', 'end_time', 'max_participants', 'cost')
+    list_display = ('title', 'start_time', 'end_time', 'max_participants')
     search_fields = ('title',)
     list_filter = ('start_time', 'end_time')
     ordering = ('-start_time',)

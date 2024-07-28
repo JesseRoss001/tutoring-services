@@ -80,7 +80,8 @@ class GroupSession(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     max_participants = models.PositiveIntegerField()
-    cost = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+    meeting_url = models.URLField(blank=True, null=True)
+    
 
     def __str__(self):
         return f"{self.title} - {self.start_time.strftime('%Y-%m-%d %H:%M')}"
