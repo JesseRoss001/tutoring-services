@@ -34,7 +34,10 @@ urlpatterns = [
     path('payment-cancel/', views.payment_cancel, name='payment_cancel'),
     path('schedule/', include('schedule.urls')),
     path('payments/', include('payments.urls')),
-    path('event/<int:event_id>/', views.event_detail, name='event_detail')
+    path('event/<int:event_id>/', views.event_detail, name='event_detail'),
+    path('create-stripe-checkout-session-for-hour/', views.create_stripe_checkout_session_for_hour,name='create_stripe_checkout_session_for_hour'),
+    path('payment-success-hour/', views.payment_success_hour, name='payment_success_hour'),
+    path('payment-cancel-hour/', views.payment_cancel_hour, name='payment_cancel_hour'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += router.urls

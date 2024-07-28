@@ -103,8 +103,8 @@ class AvailableHour(models.Model):
     specific_date = models.DateField(blank=True, null=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
-    is_available = models.BooleanField(default=False)  # Not available by default
-    is_recurring = models.BooleanField(default=False)  # New field to handle recurring hours
+    is_available = models.BooleanField(default=True)
+    is_recurring = models.BooleanField(default=False)
 
     def __str__(self):
         if self.specific_date:

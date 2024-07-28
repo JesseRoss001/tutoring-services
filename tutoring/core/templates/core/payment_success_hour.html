@@ -1,0 +1,19 @@
+{% extends "core/base.html" %}
+
+{% block title %}Payment Success{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-success">
+        <h1 class="mb-4">Payment Successful!</h1>
+        <p>Thank you for booking a 1-to-1 session. Your session has been successfully booked.</p>
+        <p><strong>Session Details:</strong></p>
+        <ul>
+            <li><strong>Title:</strong> {{ session.title }}</li>
+            <li><strong>Start Time:</strong> {{ session.start_time }}</li>
+            <li><strong>End Time:</strong> {{ session.end_time }}</li>
+        </ul>
+        <a href="{% url 'home' %}" class="btn btn-primary">Back to Home</a>
+    </div>
+</div>
+{% endblock %}

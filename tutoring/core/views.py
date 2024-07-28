@@ -152,7 +152,11 @@ def available_hour_detail(request, date):
     try:
         date_obj = timezone.datetime.strptime(date, '%Y-%m-%d').date()
         available_hours = AvailableHour.get_available_hours(date_obj)
-        return render(request, 'core/available_hour_detail.html', {'available_hours': available_hours, 'date': date_obj})
+        return render(request, 'core/available_hour_detail.html', {
+            'available_hours': available_hours,
+            'date': date_obj,
+            'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY,
+        })
     except Exception as e:
         return render(request, 'core/error.html', {'error': str(e)})
 
@@ -318,3 +322,82 @@ def payment_success(request):
     
 def payment_cancel(request):
     return render(request, 'core/payment_cancel.html')
+
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_stripe_checkout_session_for_hour(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'User must be authenticated'}, status=403)
+
+    try:
+        body = json.loads(request.body)
+        hour_id = body.get('hour_id')
+        available_hour = AvailableHour.objects.get(id=hour_id)
+        success_url = request.build_absolute_uri(reverse('payment_success_hour')) + '?session_id={CHECKOUT_SESSION_ID}'
+        cancel_url = request.build_absolute_uri(reverse('payment_cancel_hour'))
+
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'gbp',
+                    'product_data': {'name': '1-to-1 Session'},
+                    'unit_amount': 1500,
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={'hour_id': hour_id, 'user_id': request.user.id}
+        )
+        return JsonResponse({'sessionId': session.id})
+    except AvailableHour.DoesNotExist:
+        return JsonResponse({'error': 'Available hour not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+def payment_success_hour(request):
+    session_id = request.GET.get('session_id')
+    session = stripe.checkout.Session.retrieve(session_id)
+
+    if session.payment_status == 'paid':
+        metadata = session.metadata
+        hour_id = metadata['hour_id']
+        user_id = metadata['user_id']
+
+        available_hour = AvailableHour.objects.get(id=hour_id)
+        user = User.objects.get(id=user_id)
+        student, created = Student.objects.get_or_create(user=user)
+
+        # Mark the specific hour as booked
+        available_hour.is_available = False
+        available_hour.save()
+
+        # Create a session for the booked hour
+        booked_session = Session.objects.create(
+            title='1-to-1 Session',
+            start_time=timezone.now().replace(
+                year=available_hour.specific_date.year if available_hour.specific_date else timezone.now().year,
+                month=available_hour.specific_date.month if available_hour.specific_date else timezone.now().month,
+                day=available_hour.specific_date.day if available_hour.specific_date else timezone.now().day,
+                hour=available_hour.start_time.hour,
+                minute=available_hour.start_time.minute,
+                second=0
+            ),
+            end_time=timezone.now().replace(
+                year=available_hour.specific_date.year if available_hour.specific_date else timezone.now().year,
+                month=available_hour.specific_date.month if available_hour.specific_date else timezone.now().month,
+                day=available_hour.specific_date.day if available_hour.specific_date else timezone.now().day,
+                hour=available_hour.end_time.hour,
+                minute=available_hour.end_time.minute,
+                second=0
+            )
+        )
+        booked_session.participants.add(student)
+        return render(request, 'core/payment_success_hour.html', {'session': booked_session})
+    else:
+        return HttpResponse('Payment failed or cancelled', status=400)
+
+def payment_cancel_hour(request):
+    return render(request, 'core/payment_cancel_hour.html')

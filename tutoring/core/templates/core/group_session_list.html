@@ -11,8 +11,8 @@
                         <h5 class="card-title">{{ session.title }}</h5>
                         <p class="card-text"><strong>Start Time:</strong> {{ session.start_time }}</p>
                         <p class="card-text"><strong>End Time:</strong> {{ session.end_time }}</p>
-                        <p class="card-text"><strong>Cost:</strong> ${{ session.cost }}</p>
-                        <a href="{% url 'group_session_detail' session.id %}" class="btn btn-primary">View Details</a>
+                        
+                                                                    <p class="card-text"><strong>Meeting URL:</strong> <a href="{{ group_session.meeting_url }}" target="_blank">Join Session</a></p>
                     </div>
                 </div>
             </div>

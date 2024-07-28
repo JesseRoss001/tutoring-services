@@ -1,0 +1,14 @@
+{% extends "core/base.html" %}
+
+{% block title %}Payment Cancelled{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-warning">
+        <h1 class="mb-4">Payment Cancelled</h1>
+        <p>It seems like your payment for the 1-to-1 session was cancelled.</p>
+        <p>If you need assistance or have any questions, please contact support.</p>
+        <a href="{% url 'available_hours_list' %}" class="btn btn-primary">View Available Hours</a>
+    </div>
+</div>
+{% endblock %}

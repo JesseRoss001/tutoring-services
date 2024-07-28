@@ -1,22 +1,67 @@
 {% extends "core/base.html" %}
 
-{% block title %}Available Hours on {{ date|date:"l, d F Y" }}{% endblock %}
+{% block title %}Available Hour Details{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <h1 class="mb-4">Available Hours on {{ date|date:"l, d F Y" }}</h1>
-    <div class="list-group">
+    <div class="row">
         {% for hour in available_hours %}
-            <div class="list-group-item">
-                <p><strong>Time:</strong> {{ hour.start_time }} - {{ hour.end_time }}</p>
-                <p><strong>Cost:</strong> ${{ hour.cost }}</p>
-                {% if hour.is_available %}
-                    <a href="{% url 'book_available_hour' hour.id %}" class="btn btn-success">Book Now</a>
-                {% else %}
-                    <p class="text-danger"><strong>Already Booked</strong></p>
-                {% endif %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ hour.start_time }} - {{ hour.end_time }}</h5>
+                        {% if hour.is_available %}
+                            <p class="text-success"><strong>✔ Available</strong></p>
+                            {% if user.is_authenticated %}
+                                <button class="btn btn-primary" id="checkout-button-{{ hour.id }}" data-hour-id="{{ hour.id }}">Book This Hour</button>
+                            {% else %}
+                                <div class="alert alert-info" role="alert">
+                                    Please <a href="{% url 'login' %}">log in</a> or <a href="{% url 'signup' %}">sign up</a> to book this hour.
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-danger"><strong>✖ No Hours Available</strong></p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         {% endfor %}
     </div>
 </div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var csrftoken = '{{ csrf_token }}';
+        var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+
+        document.querySelectorAll('[id^=checkout-button-]').forEach(button => {
+            button.addEventListener('click', function() {
+                const hourId = this.dataset.hourId;
+
+                fetch('{% url "create_stripe_checkout_session_for_hour" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ hour_id: hourId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.sessionId) {
+                        stripe.redirectToCheckout({ sessionId: data.sessionId });
+                    } else {
+                        alert('Failed to create Stripe Checkout session');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Payment initiation failed.');
+                });
+            });
+        });
+    });
+</script>
 {% endblock %}
