@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User 
+from django.contrib.auth.models import User
 from schedule.models import Calendar, Event, Occurrence  # Import from Django-Scheduler
 from payments.models import BasePayment  # Import from Django-Payments
 from phonenumber_field.modelfields import PhoneNumberField
@@ -28,6 +28,9 @@ class Student(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField(unique=False, null=True, blank=True)  # Removed unique constraint for migration
     phone = PhoneNumberField(blank=True, null=True)
+    enrolled_courses = models.ManyToManyField(Course, through='Enrollment', related_name='students')
+    booked_hours = models.ManyToManyField('AvailableHour', blank=True)
+    purchased_products = models.ManyToManyField('Product', blank=True)
 
     def __str__(self):
         return self.user.username if self.user else 'Unnamed Student'
@@ -58,7 +61,6 @@ class Payment(models.Model):
     def __str__(self):
         return f"Payment of {self.amount} by {self.student.name} for {self.course.title}"
 
-
 class LiveStream(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(default='No description provided')  # Adding a default value
@@ -81,7 +83,6 @@ class GroupSession(models.Model):
     end_time = models.DateTimeField()
     max_participants = models.PositiveIntegerField()
     meeting_url = models.URLField(blank=True, null=True)
-    
 
     def __str__(self):
         return f"{self.title} - {self.start_time.strftime('%Y-%m-%d %H:%M')}"
@@ -90,6 +91,7 @@ class GroupSession(models.Model):
     def upcoming_group_sessions():
         now = timezone.now()
         return GroupSession.objects.filter(start_time__gte=now).order_by('start_time')
+
 class AvailableHour(models.Model):
     day_of_week = models.CharField(max_length=9, choices=[
         ('Monday', 'Monday'),
@@ -139,3 +141,11 @@ class Product(models.Model):
 
 class Payment(BasePayment):
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
+
+
+
+class DailySchedule(models.Model):
+    class Meta:
+        managed = False  # No migrations will be created for this model
+        verbose_name = 'Daily Schedule'
+        verbose_name_plural = 'Daily Schedules'

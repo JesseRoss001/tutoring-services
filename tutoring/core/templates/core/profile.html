@@ -1,0 +1,43 @@
+<!-- your_app/templates/core/profile.html -->
+
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h2>Profile</h2>
+<p>Name: {{ student.name }}</p>
+<p>Email: {{ student.email }}</p>
+<p>Phone: {{ student.phone }}</p>
+
+<h3>Enrolled Courses</h3>
+{% if enrollments %}
+<ul>
+    {% for course in enrollments %}
+    <li>{{ course.title }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No enrolled courses.</p>
+{% endif %}
+
+<h3>Booked Hours</h3>
+{% if booked_hours %}
+<ul>
+    {% for hour in booked_hours %}
+    <li>{{ hour.specific_date }} ({{ hour.day_of_week }}) - {{ hour.start_time }} to {{ hour.end_time }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No booked hours.</p>
+{% endif %}
+
+<h3>Purchased Products</h3>
+{% if purchased_products %}
+<ul>
+    {% for product in purchased_products %}
+    <li>{{ product.name }} - {{ product.price }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No purchased products.</p>
+{% endif %}
+{% endblock %}

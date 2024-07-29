@@ -21,6 +21,7 @@ from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from .forms import CustomUserCreationForm
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -36,6 +37,45 @@ def home(request):
         user_courses = Enrollment.objects.filter(student__user=request.user).exists()
     
     return render(request, 'core/home.html', {'user_courses': user_courses})
+
+
+@login_required
+def profile(request):
+    student = get_object_or_404(Student, user=request.user)
+    enrollments = student.enrolled_courses.all()
+    booked_hours = student.booked_hours.all()
+    purchased_products = student.purchased_products.all()
+
+    context = {
+        'student': student,
+        'enrollments': enrollments,
+        'booked_hours': booked_hours,
+        'purchased_products': purchased_products,
+    }
+    return render(request, 'core/profile.html', context)
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'core/login.html', {'form': form})
+
+def signup(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            Student.objects.create(user=user, email=user.email, phone=form.cleaned_data.get('phone'))
+            login(request, user)
+            return redirect('home')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'core/signup.html', {'form': form})
 
 
 def live_stream_list(request):
@@ -232,27 +272,7 @@ def event_detail(request, event_id):
         return render(request, 'core/error.html', {'error': str(e)})
 
 
-def signup(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home')
-    else:
-        form = UserCreationForm()
-    return render(request, 'core/signup.html', {'form': form})
 
-def login_view(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('home')
-    else:
-        form = AuthenticationForm()
-    return render(request, 'core/login.html', {'form': form})
 
 def logout_view(request):
     if request.method == 'POST':

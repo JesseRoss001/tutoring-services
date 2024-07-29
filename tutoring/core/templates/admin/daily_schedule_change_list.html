@@ -1,0 +1,41 @@
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+<h1>Daily Schedule for {{ today }}</h1>
+
+<h2>Available Hours</h2>
+<ul>
+    {% for hour in available_hours %}
+    <li>{{ hour.specific_date }} ({{ hour.day_of_week }}) - {{ hour.start_time }} to {{ hour.end_time }}</li>
+    {% empty %}
+    <li>No available hours today.</li>
+    {% endfor %}
+</ul>
+
+<h2>Group Sessions</h2>
+<ul>
+    {% for session in group_sessions %}
+    <li>{{ session.title }} - {{ session.start_time }} to {{ session.end_time }}</li>
+    {% empty %}
+    <li>No group sessions today.</li>
+    {% endfor %}
+</ul>
+
+<h2>Course Sessions</h2>
+<ul>
+    {% for session in course_sessions %}
+    <li>{{ session.course.title }} - {{ session.start_time }} to {{ session.end_time }}</li>
+    {% empty %}
+    <li>No course sessions today.</li>
+    {% endfor %}
+</ul>
+
+<h2>Live Streams</h2>
+<ul>
+    {% for stream in live_streams %}
+    <li>{{ stream.title }} - {{ stream.start_time }} to {{ stream.end_time }}</li>
+    {% empty %}
+    <li>No live streams today.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

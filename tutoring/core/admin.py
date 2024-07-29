@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
-from .models import Product, Course, Session, Review, LiveStream, Student, AvailableHour, GroupSession, CourseSession, Payment, Enrollment
+from .models import Product, Course, Session, Review, LiveStream, Student, AvailableHour, GroupSession, CourseSession, Payment, Enrollment,DailySchedule
 
 
 # Helper function to handle repeated registrations
@@ -71,6 +71,31 @@ class EnrollmentAdmin(admin.ModelAdmin):
     search_fields = ('student__name', 'course__title')
     list_filter = ('enrolled_date', 'course')
 
+
+
+class DailyScheduleAdmin(admin.ModelAdmin):
+    change_list_template = 'admin/daily_schedule_change_list.html'
+    list_display = ('get_today',)
+
+    def get_today(self, obj):
+        return timezone.now().date()
+    get_today.short_description = 'Today'
+
+    def changelist_view(self, request, extra_context=None):
+        today = timezone.now().date()
+        available_hours = AvailableHour.objects.filter(specific_date=today)
+        group_sessions = GroupSession.objects.filter(start_time__date=today)
+        course_sessions = CourseSession.objects.filter(start_time__date=today)
+        live_streams = LiveStream.objects.filter(start_time__date=today)
+
+        extra_context = extra_context or {}
+        extra_context['available_hours'] = available_hours
+        extra_context['group_sessions'] = group_sessions
+        extra_context['course_sessions'] = course_sessions
+        extra_context['live_streams'] = live_streams
+        extra_context['today'] = today
+
+        return super(DailyScheduleAdmin, self).changelist_view(request, extra_context=extra_context)
 # Register all models using the helper function to handle any AlreadyRegistered errors
 register_admin(Course, CourseAdmin)
 register_admin(Student, StudentAdmin)
@@ -83,3 +108,4 @@ register_admin(LiveStream, LiveStreamAdmin)
 register_admin(Payment, PaymentAdmin)
 register_admin(AvailableHour, AvailableHourAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
+admin.site.register(DailySchedule, DailyScheduleAdmin)
