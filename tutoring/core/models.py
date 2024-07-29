@@ -144,8 +144,3 @@ class Payment(BasePayment):
 
 
 
-class DailySchedule(models.Model):
-    class Meta:
-        managed = False  # No migrations will be created for this model
-        verbose_name = 'Daily Schedule'
-        verbose_name_plural = 'Daily Schedules'
