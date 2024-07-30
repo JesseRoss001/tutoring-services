@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'schedule',  # Include the schedule app
     'payments',  # Include the payments app
+
 ]
 
 MIDDLEWARE = [

@@ -64,10 +64,7 @@ class LiveStreamAdmin(admin.ModelAdmin):
     search_fields = ('title',)
     list_filter = ('start_time', 'end_time')
 
-class PaymentAdmin(admin.ModelAdmin):
-    list_display = ('session', 'status', 'total')
-    search_fields = ('session__student__name',)
-    list_filter = ('status', 'created')
+
 
 class EnrollmentAdmin(admin.ModelAdmin):
     list_display = ('student', 'course', 'enrolled_date')
@@ -83,6 +80,6 @@ register_admin(Session, SessionAdmin)
 register_admin(Review, ReviewAdmin)
 register_admin(Product, ProductAdmin)
 register_admin(LiveStream, LiveStreamAdmin)
-register_admin(Payment, PaymentAdmin)
+
 register_admin(AvailableHour, AvailableHourAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)

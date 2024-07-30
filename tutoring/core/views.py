@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
+from django import template
 from django.urls import reverse
 from django.http import HttpResponse
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -13,6 +14,7 @@ import stripe
 from django.conf import settings
 from django.utils import timezone
 from datetime import datetime, timedelta
+from decimal import Decimal
 from schedule.models import Calendar, Event, Occurrence
 from payments import get_payment_model, RedirectNeeded
 from django.db import models
@@ -22,6 +24,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from .forms import CustomUserCreationForm
+from django.utils.safestring import mark_safe
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -464,3 +467,89 @@ def payment_success_hour(request):
 
 def payment_cancel_hour(request):
     return render(request, 'core/payment_cancel_hour.html')
+
+
+@login_required
+def add_to_cart(request, product_id):
+    """
+    Add a product to the cart, stored in session.
+    """
+    product = get_object_or_404(Product, id=product_id)
+    cart = request.session.get('cart', {})
+
+    # Add product to the cart or update its quantity
+    if str(product_id) in cart:
+        cart[str(product_id)]['quantity'] += 1
+    else:
+        cart[str(product_id)] = {'quantity': 1, 'price': str(product.price)}
+
+    request.session['cart'] = cart
+    return redirect('cart_detail')
+
+@login_required
+def cart_detail(request):
+    """
+    Display the cart contents.
+    """
+    cart = request.session.get('cart', {})
+    cart_items = []
+    total_price = Decimal(0)
+
+    for product_id, item in cart.items():
+        product = get_object_or_404(Product, id=product_id)
+        total_item_price = Decimal(item['price']) * item['quantity']
+        total_price += total_item_price
+        cart_items.append({
+            'product': product,
+            'quantity': item['quantity'],
+            'total_item_price': total_item_price,
+        })
+
+    context = {
+        'cart_items': cart_items,
+        'total_price': total_price,
+    }
+    return render(request, 'core/cart_detail.html', context)
+
+@login_required
+def remove_from_cart(request, product_id):
+    """
+    Remove an item from the cart.
+    """
+    cart = request.session.get('cart', {})
+
+    if str(product_id) in cart:
+        del cart[str(product_id)]
+        request.session['cart'] = cart
+
+    return redirect('cart_detail')
+
+@login_required
+def update_cart_item(request, product_id):
+    """
+    Update the quantity of an item in the cart.
+    """
+    cart = request.session.get('cart', {})
+    quantity = int(request.POST.get('quantity', 1))
+
+    if str(product_id) in cart:
+        if quantity > 0:
+            cart[str(product_id)]['quantity'] = quantity
+        else:
+            del cart[str(product_id)]
+
+    request.session['cart'] = cart
+    return redirect('cart_detail')
+
+@login_required
+def checkout(request):
+    """
+    Proceed to checkout page.
+    """
+    cart = request.session.get('cart', {})
+    if not cart:
+        return redirect('cart_detail')
+
+    # Clear the cart after checkout
+    request.session['cart'] = {}
+    return render(request, 'core/checkout.html')

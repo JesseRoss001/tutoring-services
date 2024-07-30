@@ -131,8 +131,14 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-class Payment(BasePayment):
-    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+
+    
+
+
+
+# If you have a BasePayment import, it might look like this:
+
+
 
 
 
