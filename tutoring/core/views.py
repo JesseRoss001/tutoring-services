@@ -426,6 +426,15 @@ def payment_success_hour(request):
         available_hour.is_available = False
         available_hour.save()
 
+        # Debugging: Check student before adding booked hour
+        print(f"Before adding: Booked hours for {student.name}: {[str(hour) for hour in student.booked_hours.all()]}")
+
+        # Add booked hour to student
+        student.booked_hours.add(available_hour)
+
+        # Debugging: Confirm addition
+        print(f"After adding: Booked hours for {student.name}: {[str(hour) for hour in student.booked_hours.all()]}")
+
         # Create a session for the booked hour
         booked_session = Session.objects.create(
             title='1-to-1 Session',
@@ -447,9 +456,11 @@ def payment_success_hour(request):
             )
         )
         booked_session.participants.add(student)
+
         return render(request, 'core/payment_success_hour.html', {'session': booked_session})
     else:
         return HttpResponse('Payment failed or cancelled', status=400)
+
 
 def payment_cancel_hour(request):
     return render(request, 'core/payment_cancel_hour.html')
