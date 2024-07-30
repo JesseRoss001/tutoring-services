@@ -3,14 +3,21 @@
 {% block title %}Live Streams{% endblock %}
 
 {% block content %}
+      <style> h1, h5 {
+            font-family: 'Montserrat', sans-serif;
+            color: #2C2E83;
+font-weight: 500;
+      } </style>
 <div class="container mt-5">
-    <h1 class="mb-4">Live Streams</h1>
-    <div class="row">
+<div class="header">
+    <h1 class="mb-4 text-center">Live Streams</h1>
+</div>    
+<div class="row">
         {% for stream in live_streams %}
             <div class="col-md-6 col-lg-4 mb-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">{{ stream.title }}</h5>
+                        <h5 class="card-title py-3">{{ stream.title }}</h5>
                         <p class="card-text"><strong>Start Time:</strong> {{ stream.start_time }}</p>
                         <p class="card-text"><strong>End Time:</strong> {{ stream.end_time }}</p>
                         <a href="{% url 'live_stream_detail' stream.id %}" class="btn btn-primary">View Details</a>

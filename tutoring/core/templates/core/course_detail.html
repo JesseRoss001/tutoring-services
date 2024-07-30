@@ -11,11 +11,11 @@
     {% if user.is_authenticated %}
         <button id="checkout-button" class="btn btn-primary btn-block">Pay with Stripe</button>
     {% else %}
-        <div class="alert alert-info" role="alert">
+        <div class="alert alert-info py-3" role="alert">
             Please <a href="{% url 'login' %}">log in</a> or <a href="{% url 'signup' %}">sign up</a> to purchase this course.
         </div>
     {% endif %}
-    <p class="course-description">{{ course.description }}</p>
+    <p class="course-description py-3">{{ course.description }}</p>
 </div>
 
 <script src="https://js.stripe.com/v3/"></script>

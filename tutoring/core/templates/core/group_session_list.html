@@ -1,8 +1,15 @@
 {% extends "core/base.html" %}
 
 {% block content %}
+<style>
+       h1, h5 {
+            font-family: 'Montserrat', sans-serif;
+            color: #2C2E83;
+font-weight: 500;
+        }
+</style>
 <div class="container mt-5">
-    <h1 class="mb-4">Group Sessions</h1>
+    <h1 class="mb-4 text-center py-3">Group Sessions</h1>
     <div class="row">
         {% for session in group_sessions %}
             <div class="col-md-6 col-lg-4 mb-4">

@@ -3,8 +3,13 @@
 {% block title %}Available Hours{% endblock %}
 
 {% block content %}
+      <style> h1  {
+            font-family: 'Montserrat', sans-serif;
+            color: #2C2E83;
+font-weight: 500;
+      } </style>
 <div class="container mt-5">
-    <h1 class="mb-4">Available Hours</h1>
+    <h1 class="mb-4 text-center pb-3">Available Hours</h1>
     <div class="row">
         {% for date, is_available in days_status.items %}
             <div class="col-md-4 mb-4">
