@@ -7,7 +7,7 @@
         <div class="card-body">
             <p><strong>Start Time:</strong> {{ group_session.start_time }}</p>
             <p><strong>End Time:</strong> {{ group_session.end_time }}</p>
-                                            <p class="card-text"><strong>Meeting URL:</strong> <a href="{{ group_session.meeting_url }}" target="_blank">Join Session</a></p>
+
 <p><strong>Information: </strong> {{ group_session.description }}</p>
             <p><strong>Max Participants:</strong> {{ group_session.max_participants }}</p>
             <form method="post" action="{% url 'join_group_session' group_session.id %}">
