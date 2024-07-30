@@ -1,17 +1,16 @@
-# your_app/forms.py
-
 from django import forms
-from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from phonenumber_field.formfields import PhoneNumberField
+from django.contrib.auth.models import User
 
 class CustomUserCreationForm(UserCreationForm):
+    # Include a name field
+    name = forms.CharField(max_length=100, required=True)
     email = forms.EmailField(required=True)
-    phone = PhoneNumberField(required=False)
+    phone = forms.CharField(max_length=15, required=False)
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'phone', 'password1', 'password2')
+        fields = ('username', 'name', 'email', 'phone', 'password1', 'password2')
 
     def save(self, commit=True):
         user = super().save(commit=False)

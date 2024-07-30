@@ -1,6 +1,7 @@
+# core/admin.py
+
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
-from django.utils import timezone
 from .models import Product, Course, Session, Review, LiveStream, Student, AvailableHour, GroupSession, CourseSession, Payment, Enrollment
 
 # Helper function to handle repeated registrations
@@ -27,10 +28,11 @@ class GroupSessionAdmin(admin.ModelAdmin):
     list_filter = ('start_time', 'end_time')
     ordering = ('-start_time',)
 
+
 class AvailableHourAdmin(admin.ModelAdmin):
-    list_display = ('day_of_week', 'specific_date', 'start_time', 'end_time', 'is_available', 'is_recurring')
-    list_filter = ('day_of_week', 'is_available', 'is_recurring')
-    search_fields = ('day_of_week', 'specific_date')
+    list_display = ('specific_date', 'start_time', 'end_time', 'is_available')
+    list_filter = ('specific_date', 'is_available')
+    search_fields = ('specific_date',)
 
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('name', 'email', 'phone')
@@ -39,7 +41,7 @@ class StudentAdmin(admin.ModelAdmin):
 
 class SessionAdmin(admin.ModelAdmin):
     list_display = ('title', 'start_time', 'end_time', 'get_participants')
-    search_fields = ('title', )
+    search_fields = ('title',)
     list_filter = ('start_time', 'end_time')
     ordering = ('start_time',)  # Ensures ordering by the 'start_time'
 
@@ -84,4 +86,3 @@ register_admin(LiveStream, LiveStreamAdmin)
 register_admin(Payment, PaymentAdmin)
 register_admin(AvailableHour, AvailableHourAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
-

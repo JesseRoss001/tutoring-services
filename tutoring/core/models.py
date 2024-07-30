@@ -26,10 +26,10 @@ class CourseSession(models.Model):
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=100, null=True, blank=True)
-    email = models.EmailField(unique=False, null=True, blank=True)  # Removed unique constraint for migration
+    email = models.EmailField(unique=False, null=True, blank=True)
     phone = PhoneNumberField(blank=True, null=True)
     enrolled_courses = models.ManyToManyField(Course, through='Enrollment', related_name='students')
-    booked_hours = models.ManyToManyField('AvailableHour', blank=True)
+    booked_hours = models.ManyToManyField('AvailableHour', blank=True, related_name='students')  # Add related_name
     purchased_products = models.ManyToManyField('Product', blank=True)
 
     def __str__(self):
@@ -93,32 +93,24 @@ class GroupSession(models.Model):
         return GroupSession.objects.filter(start_time__gte=now).order_by('start_time')
 
 class AvailableHour(models.Model):
-    day_of_week = models.CharField(max_length=9, choices=[
-        ('Monday', 'Monday'),
-        ('Tuesday', 'Tuesday'),
-        ('Wednesday', 'Wednesday'),
-        ('Thursday', 'Thursday'),
-        ('Friday', 'Friday'),
-        ('Saturday', 'Saturday'),
-        ('Sunday', 'Sunday')
-    ], blank=True, null=True)
-    specific_date = models.DateField(blank=True, null=True)
+    specific_date = models.DateField()
     start_time = models.TimeField()
-    end_time = models.TimeField()
+    end_time = models.TimeField(editable=False, null=True)
     is_available = models.BooleanField(default=True)
-    is_recurring = models.BooleanField(default=False)
+    is_recurring = models.BooleanField(null=True, default=False)
+
+    def save(self, *args, **kwargs):
+        start_datetime = timezone.datetime.combine(self.specific_date, self.start_time)
+        end_datetime = start_datetime + timezone.timedelta(hours=1)
+        self.end_time = end_datetime.time()
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        if self.specific_date:
-            return f"{self.specific_date}: {self.start_time} - {self.end_time}"
-        return f"{self.day_of_week}: {self.start_time} - {self.end_time}"
+        return f"{self.specific_date}: {self.start_time} - {self.end_time}"
 
     @staticmethod
     def get_available_hours(date):
-        day_of_week = date.strftime('%A')
-        specific_hours = AvailableHour.objects.filter(specific_date=date, is_available=True)
-        recurring_hours = AvailableHour.objects.filter(day_of_week=day_of_week, is_available=True, is_recurring=True)
-        return specific_hours | recurring_hours
+        return AvailableHour.objects.filter(specific_date=date, is_available=True)
 
 class Review(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)

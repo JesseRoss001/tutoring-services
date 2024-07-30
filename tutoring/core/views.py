@@ -37,13 +37,17 @@ def home(request):
         user_courses = Enrollment.objects.filter(student__user=request.user).exists()
     
     return render(request, 'core/home.html', {'user_courses': user_courses})
-
-
 @login_required
 def profile(request):
-    student = get_object_or_404(Student, user=request.user)
+    try:
+        student = get_object_or_404(Student, user=request.user)
+    except Exception as e:
+        print(f"Error fetching student for user {request.user}: {e}")
+        return render(request, 'core/error.html', {'error': 'Student profile not found'})
+
+    # Retrieve enrollments, booked hours, and purchased products
     enrollments = student.enrolled_courses.all()
-    booked_hours = student.booked_hours.all()
+    booked_hours = student.booked_hours.all().order_by('specific_date', 'start_time')  # Order the booked hours
     purchased_products = student.purchased_products.all()
 
     context = {
@@ -52,7 +56,9 @@ def profile(request):
         'booked_hours': booked_hours,
         'purchased_products': purchased_products,
     }
+
     return render(request, 'core/profile.html', context)
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -69,13 +75,25 @@ def signup(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
+            # Save the user and get the instance
             user = form.save()
-            Student.objects.create(user=user, email=user.email, phone=form.cleaned_data.get('phone'))
+
+            # Create a Student instance with the name from the form
+            student = Student.objects.create(
+                user=user,
+                name=form.cleaned_data.get('name'),  # Ensure name is saved
+                email=form.cleaned_data.get('email'),
+                phone=form.cleaned_data.get('phone')
+            )
+
+            # Log in the user
             login(request, user)
             return redirect('home')
     else:
         form = CustomUserCreationForm()
+
     return render(request, 'core/signup.html', {'form': form})
+
 
 
 def live_stream_list(request):
@@ -181,10 +199,13 @@ def available_hours_list(request):
         today = timezone.now().date()
         next_30_days = [today + timedelta(days=i) for i in range(30)]
         days_status = {}
+
         for day in next_30_days:
             hours = AvailableHour.get_available_hours(day)
             days_status[day] = hours.exists()
+
         return render(request, 'core/available_hours_list.html', {'days_status': days_status})
+
     except Exception as e:
         return render(request, 'core/error.html', {'error': str(e)})
 
@@ -192,38 +213,49 @@ def available_hour_detail(request, date):
     try:
         date_obj = timezone.datetime.strptime(date, '%Y-%m-%d').date()
         available_hours = AvailableHour.get_available_hours(date_obj)
+
         return render(request, 'core/available_hour_detail.html', {
             'available_hours': available_hours,
             'date': date_obj,
             'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY,
         })
+
     except Exception as e:
         return render(request, 'core/error.html', {'error': str(e)})
 
 def book_available_hour(request, available_hour_id):
     try:
         available_hour = get_object_or_404(AvailableHour, id=available_hour_id)
+
         if request.method == 'POST':
             if available_hour.is_available:
+                # Mark the hour as no longer available
                 available_hour.is_available = False
                 available_hour.save()
+
+                # Get the student associated with the current user
+                student = Student.objects.get(user=request.user)
+
+                # Add the available hour to the student's booked hours
+                student.booked_hours.add(available_hour)
+
+                # Create a session for the booked hour
                 session = Session.objects.create(
-                    date=timezone.now().replace(
-                        year=available_hour.specific_date.year if available_hour.specific_date else timezone.now().year,
-                        month=available_hour.specific_date.month if available_hour.specific_date else timezone.now().month,
-                        day=available_hour.specific_date.day if available_hour.specific_date else timezone.now().day,
-                        hour=available_hour.start_time.hour,
-                        minute=available_hour.start_time.minute,
-                        second=0
-                    ),
-                    duration=timedelta(hours=1),
-                    event_type='1-to-1',
-                    available_slots=1
+                    title='1-to-1 Session',
+                    start_time=timezone.datetime.combine(available_hour.specific_date, available_hour.start_time),
+                    end_time=timezone.datetime.combine(available_hour.specific_date, available_hour.end_time)
                 )
+                session.participants.add(student)
+
                 return redirect('available_hours_list')
             else:
-                return render(request, 'core/available_hour_detail.html', {'available_hour': available_hour, 'error': 'This hour is no longer available'})
+                return render(request, 'core/available_hour_detail.html', {
+                    'available_hour': available_hour,
+                    'error': 'This hour is no longer available'
+                })
+
         return render(request, 'core/book_available_hour.html', {'available_hour': available_hour})
+
     except Exception as e:
         return render(request, 'core/error.html', {'error': str(e)})
 
