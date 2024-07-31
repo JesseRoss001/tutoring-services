@@ -18,6 +18,11 @@
         </div>
     </div>
 
+    <!-- Feedback div -->
+    <div id="cart-feedback" class="alert alert-success d-none" role="alert">
+        Item added to cart! <a href="{% url 'cart_detail' %}" class="alert-link">View Cart</a>. You have <span id="cart-item-count">0</span> items in your cart.
+    </div>
+
     <div class="row">
         {% for product in page_obj %}
             <div class="col-md-4 mb-4">
@@ -27,7 +32,7 @@
                         <h5 class="card-title text-primary">{{ product.name }}</h5>
                         <p class="card-text">{{ product.description|truncatechars:100 }}</p>
                         <p class="card-text price-text">Price: £{{ product.price }}</p>
-                        <a href="#" class="btn btn-primary btn-block buy-now-button">Buy Now</a>
+                        <button class="btn btn-primary btn-block add-to-cart-button" data-product-id="{{ product.id }}">Add to Cart</button>
                     </div>
                 </div>
             </div>
@@ -81,11 +86,11 @@
     body {
         background-color: #f8f9fa;
     }
-h1  {
-            font-family: 'Montserrat', sans-serif;
-            color: #2C2E83;
-font-weight: 500;
-      } 
+    h1 {
+        font-family: 'Montserrat', sans-serif;
+        color: #2C2E83;
+        font-weight: 500;
+    }
     .product-card {
         border-radius: 15px;
         transition: transform 0.3s, box-shadow 0.3s;
@@ -111,7 +116,7 @@ font-weight: 500;
         color: #dc3545;
         font-weight: 700;
     }
-    .buy-now-button {
+    .add-to-cart-button {
         background-color: #007bff;
         border: none;
         font-size: 1.1rem;
@@ -119,7 +124,7 @@ font-weight: 500;
         border-radius: 5px;
         transition: background-color 0.3s;
     }
-    .buy-now-button:hover {
+    .add-to-cart-button:hover {
         background-color: #0056b3;
     }
     .pagination .page-link {
@@ -144,4 +149,35 @@ font-weight: 500;
         border-radius: 0 5px 5px 0;
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.add-to-cart-button');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            const productId = this.dataset.productId;
+            fetch("{% url 'add_to_cart' 0 %}".replace('0', productId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ quantity: 1 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const feedbackDiv = document.getElementById('cart-feedback');
+                    const itemCountSpan = document.getElementById('cart-item-count');
+                    itemCountSpan.textContent = data.cart_item_count;
+                    feedbackDiv.classList.remove('d-none');
+                } else {
+                    alert('Error adding item to cart.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
+</script>
 {% endblock %}

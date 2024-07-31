@@ -36,7 +36,7 @@ urlpatterns = [
     path('schedule/', include('schedule.urls')),
     path('payments/', include('payments.urls')),
     path('event/<int:event_id>/', views.event_detail, name='event_detail'),
-    path('create-stripe-checkout-session-for-hour/', views.create_stripe_checkout_session_for_hour,name='create_stripe_checkout_session_for_hour'),
+    path('create-stripe-checkout-session-for-hour/', views.create_stripe_checkout_session_for_hour, name='create_stripe_checkout_session_for_hour'),
     path('payment-success-hour/', views.payment_success_hour, name='payment_success_hour'),
     path('payment-cancel-hour/', views.payment_cancel_hour, name='payment_cancel_hour'),
     path('cart/', views.cart_detail, name='cart_detail'),
@@ -44,6 +44,9 @@ urlpatterns = [
     path('cart/remove/<int:product_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('cart/update/<int:product_id>/', views.update_cart_item, name='update_cart_item'),
     path('checkout/', views.checkout, name='checkout'),
+    path('create_cart_stripe_checkout_session/', views.create_cart_stripe_checkout_session, name='create_cart_stripe_checkout_session'),
+    path('cart-payment-success/', views.cart_payment_success, name='cart_payment_success'),
+    path('cart-payment-cancel/', views.cart_payment_cancel, name='cart_payment_cancel'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += router.urls

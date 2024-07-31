@@ -471,26 +471,24 @@ def payment_cancel_hour(request):
 
 @login_required
 def add_to_cart(request, product_id):
-    """
-    Add a product to the cart, stored in session.
-    """
-    product = get_object_or_404(Product, id=product_id)
-    cart = request.session.get('cart', {})
+    if request.method == "POST":
+        product = get_object_or_404(Product, id=product_id)
+        cart = request.session.get('cart', {})
 
-    # Add product to the cart or update its quantity
-    if str(product_id) in cart:
-        cart[str(product_id)]['quantity'] += 1
-    else:
-        cart[str(product_id)] = {'quantity': 1, 'price': str(product.price)}
+        if str(product_id) in cart:
+            cart[str(product_id)]['quantity'] += 1
+        else:
+            cart[str(product_id)] = {'quantity': 1, 'price': str(product.price)}
 
-    request.session['cart'] = cart
-    return redirect('cart_detail')
+        request.session['cart'] = cart
+
+        cart_item_count = sum(item['quantity'] for item in cart.values())
+
+        return JsonResponse({'success': True, 'cart_item_count': cart_item_count})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 @login_required
 def cart_detail(request):
-    """
-    Display the cart contents.
-    """
     cart = request.session.get('cart', {})
     cart_items = []
     total_price = Decimal(0)
@@ -508,14 +506,12 @@ def cart_detail(request):
     context = {
         'cart_items': cart_items,
         'total_price': total_price,
+        'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY,
     }
     return render(request, 'core/cart_detail.html', context)
 
 @login_required
 def remove_from_cart(request, product_id):
-    """
-    Remove an item from the cart.
-    """
     cart = request.session.get('cart', {})
 
     if str(product_id) in cart:
@@ -526,9 +522,6 @@ def remove_from_cart(request, product_id):
 
 @login_required
 def update_cart_item(request, product_id):
-    """
-    Update the quantity of an item in the cart.
-    """
     cart = request.session.get('cart', {})
     quantity = int(request.POST.get('quantity', 1))
 
@@ -543,6 +536,70 @@ def update_cart_item(request, product_id):
 
 @login_required
 def checkout(request):
+    cart = request.session.get('cart', {})
+    if not cart:
+        return redirect('cart_detail')
+
+    return render(request, 'core/checkout.html')
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_cart_stripe_checkout_session(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'User must be authenticated'}, status=403)
+
+    cart = request.session.get('cart', {})
+    if not cart:
+        return JsonResponse({'error': 'Your cart is empty'}, status=400)
+
+    try:
+        line_items = []
+        for product_id, item in cart.items():
+            product = get_object_or_404(Product, id=product_id)
+            line_items.append({
+                'price_data': {
+                    'currency': 'gbp',
+                    'product_data': {'name': product.name},
+                    'unit_amount': int(Decimal(product.price) * 100),
+                },
+                'quantity': item['quantity'],
+            })
+
+        success_url = request.build_absolute_uri(reverse('cart_payment_success')) + '?session_id={CHECKOUT_SESSION_ID}'
+        cancel_url = request.build_absolute_uri(reverse('cart_payment_cancel'))
+
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=line_items,
+            mode='payment',
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={'user_id': request.user.id}
+        )
+        return JsonResponse({'sessionId': session.id})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+def cart_payment_success(request):
+    session_id = request.GET.get('session_id')
+    session = stripe.checkout.Session.retrieve(session_id)
+
+    if session.payment_status == 'paid':
+        user_id = session.metadata['user_id']
+        user = User.objects.get(id=user_id)
+
+        # Clear the cart after payment success
+        request.session['cart'] = {}
+
+        return render(request, 'core/cart_payment_success.html', {'user': user})
+    else:
+        return HttpResponse('Payment failed or cancelled', status=400)
+
+def cart_payment_cancel(request):
+    return render(request, 'core/cart_payment_cancel.html')
+
+@login_required
+def checkout(request):
     """
     Proceed to checkout page.
     """
@@ -553,3 +610,4 @@ def checkout(request):
     # Clear the cart after checkout
     request.session['cart'] = {}
     return render(request, 'core/checkout.html')
+
