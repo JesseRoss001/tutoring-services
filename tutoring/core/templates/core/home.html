@@ -1,5 +1,5 @@
 {% extends 'core/base.html' %}
-
+{% load static %}
 {% block title %}North Wales Tutoring - Premier Education Services{% endblock %}
 
 {% block content %}
@@ -7,8 +7,9 @@
 
     <section id="hero" class="text-center">
         <h1 class="">Empowering Students Across North Wales</h1>
-        <p class="lead">Achieve academic excellence with personalised tutoring in Maths, Science, and more. Serving Gwynedd, Conwy, Denbighshire, and beyond.</p>
-        <a href="#contact" class="btn btn-primary mt-3">Get In Touch</a>
+<div class="text-hero-background py-2 border rounded">
+        <p class="lead text-dark my-2">Achieve academic excellence with personalised tutoring in Maths, Science, and more. Serving Gwynedd, Conwy, Denbighshire, and beyond.</p>
+</div>
     </section>
 
     <section id="about" class="my-5">
@@ -19,23 +20,27 @@
     <section id="services" class="my-5">
         <h2>Our Services</h2>
         <div class="row">
-            <div class="col-md-6 col-lg-4">
-                <h3>Mathematics</h3>
+            <div class="col-md-6 col-lg-4 ">
+                <img src="{% static 'images/mathematics.jpg' %}" alt="Mathematics" class="mathematics-image " style="width: 100%; border-radius: 8px;">
+                <h3 class="py-2" >Mathematics</h3>
                 <p>Master mathematical concepts with courses tailored from basic arithmetic to advanced calculus.</p>
             </div>
             <div class="col-md-6 col-lg-4">
-                <h3>Science</h3>
+                <img src="{% static 'images/science.jpg' %}" alt="Science" style="width: 100%; border-radius: 8px;">
+                <h3 class="py-2">Science</h3>
                 <p>Dive into the world of biology, chemistry, and physics with our expert tutors and state-of-the-art teaching methods.</p>
             </div>
-            <div class="col-md-12 col-lg-4">
-                <h3>Exam Preparation</h3>
+            <div class="col-md-9 col-lg-4 ">
+                <img src="{% static 'images/exam-preparation.jpg' %}" alt="Exam Preparation" style="width: 100%; border-radius: 8px;">
+                <h3 class="py-2">Exam Preparation</h3>
                 <p>Excel in your GCSEs and A-Levels with strategic preparation courses and practice exams.</p>
             </div>
         </div>
     </section>
 
-<section id="locations" class="my-5">
+<section id="locations" class="my-5 d-flex-column justify-content-center align-items-center mx-auto">
     <h2> Remote Tutoring </h2>
+    <img src="{% static 'images/remote-tutoring.jpg' %}" alt="Remote Tutoring" style="width: 80%; border-radius: 8px; margin-bottom: 20px;">
     <p>With over 10 years of experience in teaching Mathematics, I offer personalised tutoring across North Wales.</p>
     <select class="form-select" aria-label="Select your location">
         <option selected> Areas served </option>
@@ -54,63 +59,74 @@
         <option value="Prestatyn">Prestatyn</option>
         <option value="Holywell">Holywell</option>
         <option value="Llangollen">Llangollen</option>
-<option value="Across Wales and England">Other locations in Wales and England </option>
+        <option value="Across Wales and England">Other locations in Wales and England </option>
     </select>
 </section>
 
-    <section id="contact" class="my-5">
+
+
+<section class="contact-section">
+<section id="contact" class="my-5">
     <h2>Contact Us</h2>
     <p>Connect with us today to start your journey towards academic success.</p>
     <ul class="list-unstyled mx-auto text-center">
         <li><a href="https://www.facebook.com/northwalestutoring" target="_blank" class="py-2"><i class="fab fa-facebook-f"></i> Facebook</a></li>
         <li><a href="https://www.instagram.com/northwalestutoring" target="_blank" class="py-2"><i class="fab fa-instagram"></i> Instagram</a></li>
     </ul>
-    </section>
-
-  <section class="contact-section">
-  <div class="contact-intro">
-    <h2 class="contact-title">Get in Touch</h2>
-    <p class="contact-description">
-      Fill out the form below and we'll get back to you as soon as possible.
-    </p>
-  </div>
-
-  <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
-
-    <input type="hidden" name="access_key" value="632b6ca1-33c7-4cfd-9cf8-a2d7e8a6d414" />
-    <input type="hidden" name="subject" value="New Contact Form Submission from Web3Forms" />
-    <input type="hidden" name="from_name" value="My Website" />
-    <!-- More custom ization options available in the docs: https://docs.web3forms.com -->
-
-    <div class="form-group-container">
-      <div class="form-group">
-        <label for="name" class="form-label">Name</label>
-        <input id="name" name="name" class="form-input" placeholder="Your name" type="text" />
-      </div>
-      <div class="form-group">
-        <label for="email" class="form-label">Email</label>
-        <input id="email" name="email" class="form-input" placeholder="Your email" type="email" />
-      </div>
-      <div class="form-group">
-        <label for="phone" class="form-label">Phone</label>
-        <input id="phone" name="phone" class="form-input" placeholder="+1 (234) 56789" type="text" />
-      </div>
-      <div class="form-group text-dark">
-        <label for="message" class="form-label">Message</label>
-        <textarea class="form-textarea" id="message" name="message" placeholder="Your message"></textarea>
-      </div>
+</section>
+    <div class="contact-intro">
+        <h2 class="contact-title">Get in Touch</h2>
+        <p class="contact-description">
+            Fill out the form below and we'll get back to you as soon as possible.
+        </p>
     </div>
-    <button class="form-submit" type="submit">Send Message</button>
-  </form>
 
+    <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
+        <input type="hidden" name="access_key" value="632b6ca1-33c7-4cfd-9cf8-a2d7e8a6d414" />
+        <input type="hidden" name="subject" value="New Contact Form Submission from Web3Forms" />
+        <input type="hidden" name="from_name" value="My Website" />
+        <!-- More customization options available in the docs: https://docs.web3forms.com -->
+
+        <div class="form-group-container">
+            <div class="form-group">
+                <label for="name" class="form-label">Name</label>
+                <input id="name" name="name" class="form-input" placeholder="Your name" type="text" />
+            </div>
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input id="email" name="email" class="form-input" placeholder="Your email" type="email" />
+            </div>
+            <div class="form-group">
+                <label for="phone" class="form-label">Phone</label>
+                <input id="phone" name="phone" class="form-input" placeholder="+1 (234) 56789" type="text" />
+            </div>
+            <div class="form-group text-dark">
+                <label for="message" class="form-label">Message</label>
+                <textarea class="form-textarea" id="message" name="message" placeholder="Your message"></textarea>
+            </div>
+        </div>
+        <button class="form-submit" type="submit">Send Message</button>
+    </form>
 </section>
 
 <style>
-/* General Body Styles */
+/* Hero Section with Background Image */
+#hero {
+    background: url("{% static 'images/hero.jpg' %}") no-repeat center center;
+    background-size: cover;
+    height: 100vh;
+    color: rgb(20, 11, 11);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    box-sizing: border-box;
+}
 
-
-/* Navbar Customization */
-
+.mathematics-image {max-height: 300px;
+object-fit: cover;}
 
 /* Section General Styling */
 section {
@@ -124,42 +140,42 @@ section {
 }
 
 /* Titles and Headings */
-/* Titles and Headings */
 h1, h2, h3 {
     color: #333;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #dde0e3; /* Primary color for underline */
+    border-bottom: 1px solid #dde0e3;
     margin-bottom: 20px;
 }
 
 /* Social Media Icons Styling */
 ul.list-unstyled a {
-    color: #333; /* Matching text color */
-    text-decoration: none; /* No underline */
-    display: inline-block; /* Proper alignment with icon */
-    margin-right: 15px; /* Space between items */
+    color: #333;
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 15px;
 }
 
+.text-hero-background {background-color: #fafafa;}
 ul.list-unstyled i {
-    margin-right: 8px; /* Space between icon and text */
-    color: #007bff; /* Primary color for icons */
+    margin-right: 8px;
+    color: #007bff;
 }
 
 ul.list-unstyled a:hover {
-    color: #0056b3; /* Darker blue on hover for better interaction */
+    color: #0056b3;
 }
 
 /* Contact Section Styling */
 #contact {
-    background-color: #f8f9fa; /* Light background for the contact area */
+    background-color: #f8f9fa;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Soft shadow for depth */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 /* Glassmorphism for specific sections */
-#hero, #about, #services, #locations, #contact {
-    background: rgba(255, 255, 255, 0.85); /* Light background for readability */
+ #about, #services, #locations, #contact {
+    background: rgba(255, 255, 255, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     backdrop-filter: blur(1px);
@@ -170,8 +186,8 @@ ul.list-unstyled a:hover {
 
 /* Button Styling */
 .btn-primary {
-    background-color: #f2c0e3;
-color:black;
+    background-color:    #f2c0e3;
+    color: black;
     border: none;
     box-shadow: 0 4px 6px rgba(0,123,255,0.3);
 }
@@ -191,7 +207,7 @@ input[type="text"], input[type="email"], textarea {
 /* Responsive behavior */
 @media (max-width: 768px) {
     .navbar-custom {
-        backdrop-filter: none; /* Disable blur on smaller devices for performance */
+        backdrop-filter: none;
     }
 
     section {
@@ -201,85 +217,82 @@ input[type="text"], input[type="email"], textarea {
 
 /* Color palette derived from the logo */
 :root {
-    --primary-color: #8a96d2; /* Example primary color based on logo */
-    --secondary-color: #fc5c7d; /* Example secondary color based on logo */
+    --primary-color: #8a96d2;
+    --secondary-color: #fc5c7d;
 }
 
 .contact-section {
-  width: 100%;
-  max-width: 40rem;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 3rem 1rem;
+    width: 100%;
+    max-width: 40rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 3rem 1rem;
 }
 
 .contact-intro > * + * {
-  margin-top: 1rem;
+    margin-top: 1rem;
 }
 
 .contact-title {
-  font-size: 1.875rem;
-  line-height: 2.25rem;
-  font-weight: 700;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 700;
 }
 
 .contact-description {
-  color: rgb(107 114 128);
+    color: rgb(107 114 128);
 }
 
 .form-group-container {
-  display: grid;
-  gap: 1rem;
-  margin-top: 2rem;
+    display: grid;
+    gap: 1rem;
+    margin-top: 2rem;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .form-label {
-  margin-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .form-input,
 .form-textarea {
-  padding: 0.5rem;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  height: 2.5rem;
-  width: 100%;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    height: 2.5rem;
+    width: 100%;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
 }
 
 .form-input::placeholder,
 .form-textarea:focus-visible {
-  color: #6b7280;
+    color: #6b7280;
 }
 
 .form-input:focus-visible,
 .form-textarea:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
 }
 
 .form-textarea {
-  min-height: 120px;
+    min-height: 120px;
 }
 
 .form-submit {
-  width: 100%;
-  margin-top: 1.2rem;
-  background-color: #3124ca;
-  color: #fff;
-  padding: 13px 5px;
-  border-radius: 0.375rem;
+    width: 100%;
+    margin-top: 1.2rem;
+    background-color: #3124ca;
+    color: #fff;
+    padding: 13px 5px;
+    border-radius: 0.375rem;
 }
-
-
-
 
 </style>
 {% endblock %}
