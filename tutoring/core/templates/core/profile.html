@@ -31,8 +31,8 @@
 <h3>Purchased Products</h3>
 {% if purchased_products %}
 <ul>
-    {% for product in purchased_products %}
-    <li>{{ product.name }} - £{{ product.price }}</li>
+    {% for purchase in purchased_products %}
+    <li>{{ purchase.product.name }} - £{{ purchase.product.price }} (Quantity: {{ purchase.quantity }})</li>
     {% endfor %}
 </ul>
 {% else %}

@@ -25,7 +25,7 @@
 
     <div class="row">
         {% for product in page_obj %}
-            <div class="col-md-4 mb-4">
+            <div class="col-md-6 col-lg-4 mb-4">
                 <div class="card product-card border-0 shadow-sm">
                     <img src="{{ product.image.url }}" class="card-img-top product-image" alt="{{ product.name }} Image">
                     <div class="card-body">
@@ -113,7 +113,7 @@
     }
     .price-text {
         font-size: 1.25rem;
-        color: #dc3545;
+        color: #38297d;
         font-weight: 700;
     }
     .add-to-cart-button {

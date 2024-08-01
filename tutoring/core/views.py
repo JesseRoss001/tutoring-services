@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from .models import Product, Course, Session, Review, LiveStream, Student, AvailableHour, GroupSession, CourseSession, Payment, Enrollment
+from .models import Product, Course, Session, Review, LiveStream, Student, AvailableHour, GroupSession, CourseSession, Payment, Enrollment,ProductPurchase
 from .serializers import ProductSerializer
 from django.core.paginator import Paginator
 import json
@@ -40,6 +40,7 @@ def home(request):
         user_courses = Enrollment.objects.filter(student__user=request.user).exists()
     
     return render(request, 'core/home.html', {'user_courses': user_courses})
+
 @login_required
 def profile(request):
     try:
@@ -51,7 +52,7 @@ def profile(request):
     # Retrieve enrollments, booked hours, and purchased products
     enrollments = student.enrolled_courses.all()
     booked_hours = student.booked_hours.all().order_by('specific_date', 'start_time')  # Order the booked hours
-    purchased_products = student.purchased_products.all()
+    purchased_products = ProductPurchase.objects.filter(student=student)
 
     context = {
         'student': student,

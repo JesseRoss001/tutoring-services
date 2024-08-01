@@ -1,9 +1,11 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
-from schedule.models import Calendar, Event, Occurrence  # Import from Django-Scheduler
-from payments.models import BasePayment  # Import from Django-Payments
 from phonenumber_field.modelfields import PhoneNumberField
+
+# If these imports are not used in this file, remove them to keep the file clean
+# from schedule.models import Calendar, Event, Occurrence  # Import from Django-Scheduler
+# from payments.models import BasePayment  # Import from Django-Payments
 
 class Course(models.Model):
     title = models.CharField(max_length=100)
@@ -29,8 +31,8 @@ class Student(models.Model):
     email = models.EmailField(unique=False, null=True, blank=True)
     phone = PhoneNumberField(blank=True, null=True)
     enrolled_courses = models.ManyToManyField(Course, through='Enrollment', related_name='students')
-    booked_hours = models.ManyToManyField('AvailableHour', blank=True, related_name='students')  # Add related_name
-    purchased_products = models.ManyToManyField('Product', blank=True)
+    booked_hours = models.ManyToManyField('AvailableHour', blank=True, related_name='students')
+    purchased_products = models.ManyToManyField('Product', through='ProductPurchase', related_name='students')
 
     def __str__(self):
         return self.user.username if self.user else 'Unnamed Student'
@@ -63,7 +65,7 @@ class Payment(models.Model):
 
 class LiveStream(models.Model):
     title = models.CharField(max_length=200)
-    description = models.TextField(default='No description provided')  # Adding a default value
+    description = models.TextField(default='No description provided')
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     link = models.URLField()
@@ -131,14 +133,11 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+class ProductPurchase(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    purchase_date = models.DateTimeField(auto_now_add=True)
 
-    
-
-
-
-# If you have a BasePayment import, it might look like this:
-
-
-
-
-
+    def __str__(self):
+        return f"{self.student.name} purchased {self.quantity} of {self.product.name}"

@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 from django.contrib.admin.sites import AlreadyRegistered
-from .models import Product, Course, Session, Review, LiveStream, Student, AvailableHour, GroupSession, CourseSession, Payment, Enrollment
+from .models import Product, Course, Session, Review, LiveStream, Student, AvailableHour, GroupSession, CourseSession, Payment, Enrollment, ProductPurchase
 
 # Helper function to handle repeated registrations
 def register_admin(model, admin_class):
@@ -34,10 +34,15 @@ class AvailableHourAdmin(admin.ModelAdmin):
     list_filter = ('specific_date', 'is_available')
     search_fields = ('specific_date',)
 
+class ProductPurchaseInline(admin.TabularInline):
+    model = ProductPurchase
+    extra = 0  # Prevents extra empty rows from showing
+
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('name', 'email', 'phone')
     search_fields = ('name', 'email')
-    filter_horizontal = ('booked_hours', 'purchased_products')
+    filter_horizontal = ('booked_hours',)  # Removed 'purchased_products'
+    inlines = [ProductPurchaseInline]  # Added inline for ProductPurchase
 
 class SessionAdmin(admin.ModelAdmin):
     list_display = ('title', 'start_time', 'end_time', 'get_participants')
