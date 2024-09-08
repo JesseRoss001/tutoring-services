@@ -1,7 +1,10 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-2">
+    <div class="alert alert-primary text-center" role="alert">
+        Our store opens in 2025! Stay tuned.
+    </div>
     <div class="row mb-3 align-items-center">
         <div class="col-md-8">
             <h1 class="">Our Exclusive Products</h1>
@@ -24,19 +27,27 @@
     </div>
 
     <div class="row">
-        {% for product in page_obj %}
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card product-card border-0 shadow-sm">
-                    <img src="{{ product.image.url }}" class="card-img-top product-image" alt="{{ product.name }} Image">
-                    <div class="card-body">
-                        <h5 class="card-title text-primary">{{ product.name }}</h5>
-                        <p class="card-text">{{ product.description|truncatechars:100 }}</p>
-                        <p class="card-text price-text">Price: £{{ product.price }}</p>
-                        <button class="btn btn-primary btn-block add-to-cart-button" data-product-id="{{ product.id }}">Add to Cart</button>
-                    </div>
+        {% if not page_obj %}
+            <div class="col-12">
+                <div class="alert alert-primary text-center" role="alert">
+                    Our store will feature exciting products in 2025. Stay tuned!
                 </div>
             </div>
-        {% endfor %}
+        {% else %}
+            {% for product in page_obj %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card product-card border-0 shadow-sm">
+                        <img src="{{ product.image.url }}" class="card-img-top product-image" alt="{{ product.name }} Image">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">{{ product.name }}</h5>
+                            <p class="card-text">{{ product.description|truncatechars:100 }}</p>
+                            <p class="card-text price-text">Price: £{{ product.price }}</p>
+                            <button class="btn btn-primary btn-block add-to-cart-button" data-product-id="{{ product.id }}">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
     </div>
 
     <div class="row">
@@ -147,6 +158,10 @@
     }
     .input-group .btn {
         border-radius: 0 5px 5px 0;
+    }
+    .alert-primary {
+        background-color: #007bff;
+        color: white;
     }
 </style>
 

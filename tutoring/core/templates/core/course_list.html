@@ -12,11 +12,11 @@
     padding: 20px;
 }
 
-    h1, h5 {
-            font-family: 'Montserrat', sans-serif;
-            color: #2C2E83;
-font-weight: 500;
-      } 
+h1, h5 {
+    font-family: 'Montserrat', sans-serif;
+    color: #2C2E83;
+    font-weight: 500;
+} 
 /* Page Title Styling */
 .page-title {
     font-size: 2rem;
@@ -50,13 +50,29 @@ font-weight: 500;
 .course-item a:hover {
     text-decoration: underline;
 }
+
+/* Banner Styling */
+.banner {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
 </style>
 <div class="container mt-4">
     <h1 class="page-title">Courses</h1>
+    {% if not courses %}
+    <div class="banner">
+        This page will be available in 2025.
+    </div>
+    {% else %}
     <ul class="course-list">
         {% for course in courses %}
         <li class="course-item"><a href="{% url 'course_detail' course.id %}">{{ course.title }}</a></li>
         {% endfor %}
     </ul>
+    {% endif %}
 </div>
 {% endblock %}
