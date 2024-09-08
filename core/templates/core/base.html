@@ -99,12 +99,13 @@
         box-shadow: none;
     }
 }
+.max-width-container {max-width: 1200px;}
     </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
-        <div class="container-fluid">
+        <div class="container-fluid max-width-container mx-auto">
             <a class="navbar-brand" href="{% url 'home' %}">
                 <img src="{% static 'images/logo.png' %}" alt="North Wales Tutoring" height="30">
                 North Wales Tutoring
