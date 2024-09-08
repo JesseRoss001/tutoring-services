@@ -16,7 +16,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # CSRF Trusted Origins adds the HTTP origins that are trusted to send the CSRF token.
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000','tutoring1-2a2a70348a6b.herokuapp.com','northwalestutoring.com']
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000', 'tutoring1-2a2a70348a6b.herokuapp.com', 'northwalestutoring.com']
 
 # Application definition
 INSTALLED_APPS = [
